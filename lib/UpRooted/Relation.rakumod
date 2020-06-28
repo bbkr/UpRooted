@@ -5,12 +5,26 @@ has Str $.name is required;
 has @.parent-columns is required;
 has @.child-columns is required;
 
-method parent-table {
-    # every column belongs to the same table
-    @.parent-columns.first.table;
-}
+submethod BUILD (
+	:@!parent-columns! where { .elems },
+	:@!child-columns! where { .elems },
+	Str:D :$!name!
+) {
 
-method child-table {
-    # every column belongs to the same table
-    @.child-columns.first.table;
+	die 'Parent columns must be from the same table!' 
+		unless [===]( @!parent-columns );
+	
+	die 'Child columns must be from the same table!' 
+		unless [===]( @!child-columns );
+	
+	die 'Parent and child columns count different!'
+		unless @!parent-columns.elems == @!child-columns.elems;
+	
+	die 'Parent and child columns count different!'
+		unless @!parent-columns.elems == @!child-columns.elems;
+	
+	die 'Relation already present in parent table!'
+		if $!table.columns{ $!name }:exists;
+	
+	$!table.parent-relations{ $!name } = self;
 }

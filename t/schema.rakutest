@@ -3,3 +3,74 @@ use lib 'lib';
 use Test;
 
 use UpRooted::Schema;
+use UpRooted::Table;
+use UpRooted::Column;
+use UpRooted::Relation;
+
+subtest 'basic' => {
+
+	my ( $schema, $table, $column, $relation );
+
+	lives-ok {
+		$schema = UpRooted::Schema.new;
+	}, 'schema created';
+
+	lives-ok {
+		$table = UpRooted::Table.new(
+			:$schema,
+			name => 'A'
+		);
+	}, 'table created';
+	ok $schema.tables{ 'A' } === $table, 'table registered';
+
+	dies-ok {
+		UpRooted::Table.new(
+			:$schema,
+			name => 'A'
+		);
+	}, 'duplicated table dies';
+	
+	lives-ok {
+		$column = UpRooted::Column.new(
+			:$table,
+			name => 'A',
+			:!is-nullable
+		);
+	}, 'column created';
+	ok $table.columns{ 'A' } === $column, 'column registered';
+
+	dies-ok {
+		UpRooted::Column.new(
+			:$table,
+			name => 'A',
+			:!is-nullable
+		);
+	}, 'duplicated column dies';
+	
+	lives-ok {
+		$relation = UpRooted::Relation.new(
+			parent-columns => [ $column ],
+			child-columns => [ $column ],
+			name => 'A_to_A'
+		);
+	}, 'relation created';
+	#ok $table.columns{ 'A' } === $column, 'column registered';
+	
+};
+
+
+=finish
+
+
+lives-ok { $schema.add-table( name => 'a' ) }, 'add table';
+dies-ok { $schema.add-table( name => 'a' ) }, 'cannot add existing table';
+isa-ok $schema.table( 'a' ), 'UpRooted::Table', 'table present';
+
+my $table1 = $schema.table( 'a' );
+lives-ok { $schema.add-column( name => '1' ) }, 'add column';
+
+$table.add-relation( foo, $table.columns( 'z', 'x' ) )
+
+
+Table.new( schema => $s, name => 'x')'
+
