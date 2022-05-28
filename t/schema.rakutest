@@ -5,56 +5,79 @@ use Test;
 use UpRooted::Schema;
 use UpRooted::Table;
 use UpRooted::Column;
-use UpRooted::Relation;
 
-subtest 'basic' => {
+
+# use UpRooted::Relation;
+
+subtest 'construction' => {
 
 	my ( $schema, $table, $column, $relation );
 
-	lives-ok {
-		$schema = UpRooted::Schema.new;
-	}, 'schema created';
+    # Schema
+    
+    lives-ok {
+        $schema = UpRooted::Schema.new( name => 's1' );
+    }, 'Schema created';
 
-	lives-ok {
-		$table = UpRooted::Table.new(
-			:$schema,
-			name => 'A'
-		);
-	}, 'table created';
-	ok $schema.tables{ 'A' } === $table, 'table registered';
+    # Table
+    
+    dies-ok {
+        $schema.table( 't1' );
+    }, 'Table is not present in Schema';
+    
+    lives-ok {
+        $table = UpRooted::Table.new( :$schema, name => 't1' );
+    }, 'Table created';
 
-	dies-ok {
-		UpRooted::Table.new(
-			:$schema,
-			name => 'A'
-		);
-	}, 'duplicated table dies';
-	
-	lives-ok {
-		$column = UpRooted::Column.new(
-			:$table,
-			name => 'A',
-			:!is-nullable
-		);
-	}, 'column created';
-	ok $table.columns{ 'A' } === $column, 'column registered';
+    ok $schema.table( 't1' ):defined, 'Table is present in Schema';
+    
+    dies-ok {
+        UpRooted::Table.new( :$schema, name => 't1' );
+    }, 'Table is already present in Schema';
+    
+    dies-ok {
+        # make sure user will not be able to break consistency
+        $schema.add-table(
+            UpRooted::Table.new( UpRooted::Schema.new( 'name' => 's2' ), name => 't2' )
+        )
+    }, 'Table is from different Schema';
 
-	dies-ok {
-		UpRooted::Column.new(
-			:$table,
-			name => 'A',
-			:!is-nullable
-		);
-	}, 'duplicated column dies';
-	
-	lives-ok {
-		$relation = UpRooted::Relation.new(
-			parent-columns => [ $column ],
-			child-columns => [ $column ],
-			name => 'A_to_A'
-		);
-	}, 'relation created';
-	#ok $table.columns{ 'A' } === $column, 'column registered';
+    # Column
+    
+    dies-ok {
+        $table.column( 'c1' );
+    }, 'Column is not present in Table';
+
+    lives-ok {
+        $column = UpRooted::Column.new( :$table, name => 'c1', :!nullable );
+    }, 'Column created';
+    
+    ok $table.column( 'c1' ):defined, 'Column is present in Table';
+    
+    dies-ok {
+        UpRooted::Column.new( :$table, name => 'c1', :!nullable );
+    }, 'Column is already present in Table';
+
+
+    
+#     ok $table.columns{ 'A' } === $column, 'column registered';
+#
+#     dies-ok {
+#         UpRooted::Column.new(
+#             :$table,
+#             name => 'A',
+#             :!is-nullable
+#         );
+#     }, 'duplicated column dies';
+#
+#     lives-ok {
+#         $relation = UpRooted::Relation.new(
+#             parent-columns => [ $column ],
+#             child-columns => [ $column ],
+#             name => 'A_to_A'
+#         );
+#     }, 'relation created';
+#     #ok $table.columns{ 'A' } === $column, 'column registered';
 	
 };
 

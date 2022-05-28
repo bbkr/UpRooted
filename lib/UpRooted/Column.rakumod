@@ -2,11 +2,11 @@ unit class UpRooted::Column;
 
 has $.table is required;
 has Str $.name is required;
+has Bool $.nullable is required;
 
-submethod BUILD ( :$!table, Str:D :$!name!, Bool:D :$is-nullable! ) {
+submethod TWEAK {
 
-	die 'Column already present!'
-		if $!table.columns{ $!name }:exists;
-	
-	$!table.columns{ $!name } = self;
+	# register Column in Table
+    $!table.add-column( self );
+
 }
