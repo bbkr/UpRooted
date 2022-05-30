@@ -5,95 +5,87 @@ use Test;
 use UpRooted::Schema;
 use UpRooted::Table;
 use UpRooted::Column;
+use UpRooted::Relation;
 
+plan 3;
 
-# use UpRooted::Relation;
+subtest 'schema' => {
 
-subtest 'construction' => {
-
-	my ( $schema, $table, $column, $relation );
-
-    # Schema
+    plan 1;
     
     lives-ok {
-        $schema = UpRooted::Schema.new( name => 's1' );
+        UpRooted::Schema.new( name => 's1' );
     }, 'Schema created';
 
-    # Table
+};
+
+subtest 'table' => {
+
+    plan 6;
+
+    my $schema = UpRooted::Schema.new( name => 's1' );
     
-    dies-ok {
+    throws-like {
         $schema.table( 't1' );
-    }, 'Table is not present in Schema';
+    }, Exception, message => 'Table t1 is not present in Schema s1.', 'Table is not present in Schema';
     
     lives-ok {
-        $table = UpRooted::Table.new( :$schema, name => 't1' );
+        UpRooted::Table.new( :$schema, name => 't1' );
     }, 'Table created';
 
     ok $schema.table( 't1' ):defined, 'Table is present in Schema';
     
-    dies-ok {
+    throws-like {
         UpRooted::Table.new( :$schema, name => 't1' );
-    }, 'Table is already present in Schema';
+    }, Exception, message => 'Table t1 ia already present in Schema s1.', 'Table is already present in Schema';
     
-    dies-ok {
-        # make sure user will not be able to break consistency
+    throws-like {
         $schema.add-table(
-            UpRooted::Table.new( UpRooted::Schema.new( 'name' => 's2' ), name => 't2' )
+            UpRooted::Table.new( schema => UpRooted::Schema.new( name => 's2' ), name => 't2' )
         )
-    }, 'Table is from different Schema';
+    }, Exception, message => 'Table t2 is from different Schema than s1.', 'Table is from different Schema';
 
-    # Column
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    is-deeply $schema.tables.map( { .name } ), ( 't1', 't2', 't3' ), 'All Tables in alphabetical order';
+
+}
+
+subtest 'column' => {
     
-    dies-ok {
-        $table.column( 'c1' );
-    }, 'Column is not present in Table';
+    plan 8;
+
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    
+    throws-like {
+        $schema.table( 't1' ).column( 'c1' );
+    }, Exception, message => 'Column c1 is not present in Table t1.', 'Column is not present in Table';
 
     lives-ok {
-        $column = UpRooted::Column.new( :$table, name => 'c1', :!nullable );
+        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
     }, 'Column created';
     
-    ok $table.column( 'c1' ):defined, 'Column is present in Table';
+    ok $schema.table( 't1' ).column( 'c1' ):defined, 'Column is present in Table';
     
-    dies-ok {
-        UpRooted::Column.new( :$table, name => 'c1', :!nullable );
-    }, 'Column is already present in Table';
+    throws-like {
+        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    }, Exception, message => 'Column c1 ia already present in Table t1.', 'Column is already present in Table';
 
+    throws-like {
+        $schema.table( 't1' ).add-column(
+            UpRooted::Column.new( table => UpRooted::Table.new( :$schema, name => 't2' ), name => 'c2', :nullable )
+        );
+    }, Exception, message => 'Column c2 is from different Table than t1.', 'Column is from different Table';
 
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c3', :!nullable, order => 3 );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :!nullable, order => 2 );
+    is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'c1', 'c2', 'c3' ), 'All Columns in definition order';
     
-#     ok $table.columns{ 'A' } === $column, 'column registered';
-#
-#     dies-ok {
-#         UpRooted::Column.new(
-#             :$table,
-#             name => 'A',
-#             :!is-nullable
-#         );
-#     }, 'duplicated column dies';
-#
-#     lives-ok {
-#         $relation = UpRooted::Relation.new(
-#             parent-columns => [ $column ],
-#             child-columns => [ $column ],
-#             name => 'A_to_A'
-#         );
-#     }, 'relation created';
-#     #ok $table.columns{ 'A' } === $column, 'column registered';
-	
-};
+    is-deeply $schema.table( 't1' ).columns( 'c3', 'c1' ).map( { .name } ), ( 'c3', 'c1' ), 'Subset of Columns in requested order';
 
+    throws-like {
+        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c4', :!nullable, order => 1 );
+    }, Exception, message => 'Column c4 has order conflict in Table t1.', 'Column has order conflict in Table';
 
-=finish
-
-
-lives-ok { $schema.add-table( name => 'a' ) }, 'add table';
-dies-ok { $schema.add-table( name => 'a' ) }, 'cannot add existing table';
-isa-ok $schema.table( 'a' ), 'UpRooted::Table', 'table present';
-
-my $table1 = $schema.table( 'a' );
-lives-ok { $schema.add-column( name => '1' ) }, 'add column';
-
-$table.add-relation( foo, $table.columns( 'z', 'x' ) )
-
-
-Table.new( schema => $s, name => 'x')'
-
+}

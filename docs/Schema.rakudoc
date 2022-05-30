@@ -1,6 +1,5 @@
 =begin pod
 
-
 =head1 DESCRIPTION
 
 Guide how to compose database Schema.
@@ -10,12 +9,10 @@ For people who want to write Schema auto-discovery plugins for various database 
 For cases when auto-discovery failed and Schema must be manually tuned
 (like in MySQL where partitioning does not allow to create proper foreign keys relations).
 
-
 =head1 NOTICE
 
 It is NOT meant to be user-friendly ORM.
 Limited interface is specifically designed to define and analyze database layout for further data extraction.
-
 
 =head1 SYNOPSIS
 
@@ -56,6 +53,7 @@ Connect Tables with Relations:
         parent-columns => $library.table( 'authors' ).column( 'id' ),
         child-columns => $library.table( 'books' ).column( 'author_id' )
     );
+
 
 =head1 RULES
 

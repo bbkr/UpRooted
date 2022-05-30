@@ -76,5 +76,5 @@ Returns all L<UpRooted::Table>s in alphabetical order.
 
 method tables {
     
-    return %!tables.sort( { .key } ).values;
+    return %!tables.values.sort( *.name );
 }
