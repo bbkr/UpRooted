@@ -50,8 +50,8 @@ Connect Tables with Relations:
 
     UpRooted::Relation.new(
         name => 'who-wrote-what',
-        parent-columns => $library.table( 'authors' ).column( 'id' ),
-        child-columns => $library.table( 'books' ).column( 'author_id' )
+        parent-columns => $library.table( 'authors' ).columns( 'id' ),
+        child-columns => $library.table( 'books' ).columns( 'author_id' )
     );
 
 
@@ -66,6 +66,8 @@ Top-down breacrumb trails like C<$schema.table( 'x' ).column( 'y' )> will become
 and you can use them during further composition.
 
 Never add to Schema any virtual objects, such as views or materialized columns.
+
+Composition will die on slightest sign of inconsistency, for example requesting unknown Column name from Table.
 
 =head1 ADVANCED
 

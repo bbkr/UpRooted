@@ -75,7 +75,7 @@ has Int $.order;
 
 submethod TWEAK {
 
-	# if order is not provided use the one in which Columns are added.
+	# if order is not provided use the one in which Columns are added
     $!order //= $!table.columns.elems + 1;
     
     # register Column in Table

@@ -7,7 +7,7 @@ use UpRooted::Table;
 use UpRooted::Column;
 use UpRooted::Relation;
 
-plan 3;
+plan 4;
 
 subtest 'schema' => {
 
@@ -53,7 +53,7 @@ subtest 'table' => {
 
 subtest 'column' => {
     
-    plan 8;
+    plan 9;
 
     my $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
@@ -67,6 +67,8 @@ subtest 'column' => {
     }, 'Column created';
     
     ok $schema.table( 't1' ).column( 'c1' ):defined, 'Column is present in Table';
+    
+    is $schema.table( 't1' ).column( 'c1' ).order, 1, 'Automatic Column order set.';
     
     throws-like {
         UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
@@ -87,5 +89,93 @@ subtest 'column' => {
     throws-like {
         UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c4', :!nullable, order => 1 );
     }, Exception, message => 'Column c4 has order conflict in Table t1.', 'Column has order conflict in Table';
+
+}
+
+subtest 'relation' => {
+    
+    plan 14;
+
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :!nullable );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c3', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c4', :nullable );
+
+    throws-like {
+        $schema.table( 't1' ).child-relation( 'r1' );
+    }, Exception, message => 'Relation r1 is not present in Table t1.', 'Relation is not present in Table';
+    
+    lives-ok {
+        UpRooted::Relation.new(
+            parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+            child-columns => $schema.table( 't2' ).columns( 'c3' ),
+            name => 'r1'
+        );
+    }, 'Relation on single column created';
+    
+    ok $schema.table( 't1' ).child-relation( 'r1' ):defined, 'Relation is present in Table';
+    
+    with $schema.table( 't1' ).child-relation( 'r1' ) {
+        is .parent-table, $schema.table( 't1' ), 'Relation knows parent Table from Columns.';
+        is .child-table, $schema.table( 't2' ), 'Relation knows child Table from Columns.';
+        nok .nullable, 'Relation is not nullable.';
+    }
+    
+    throws-like {
+        UpRooted::Relation.new(
+            parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+            child-columns => $schema.table( 't2' ).columns( 'c3' ),
+            name => 'r1'
+        );
+    }, Exception, message => 'Relation r1 ia already present in parent Table t1.', 'Column count for parent and child Table is different';
+    
+    lives-ok {
+        UpRooted::Relation.new(
+            parent-columns => $schema.table( 't1' ).columns( 'c1', 'c2' ),
+            child-columns => $schema.table( 't2' ).columns( 'c3', 'c4' ),
+            name => 'r2'
+        );
+    }, 'Relation on multiple columns created';
+    
+    ok $schema.table( 't1' ).child-relation( 'r2' ).nullable, 'Relation is nullable.';
+    
+    is-deeply $schema.table( 't1' ).children-relations.map( { .name } ), ( 'r1', 'r2' ), 'All Relations to child Tables in name order';
+    
+    throws-like {
+        UpRooted::Relation.new(
+            parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+            child-columns => $schema.table( 't2' ).columns( 'c3', 'c4' ),
+            name => 'r3'
+        );
+    }, Exception, message => 'Parent and child Columns count different in Relation r3.', 'Column count for parent and child Table is different';
+    
+    throws-like {
+        UpRooted::Relation.new(
+            parent-columns => [ $schema.table( 't1' ).column( 'c1' ), $schema.table( 't2' ).column( 'c3' ) ],
+            child-columns => $schema.table( 't2' ).columns( 'c3', 'c4' ),
+            name => 'r3'
+        );
+    }, Exception, message => 'Parent Columns must be from the same Table in Relation r3.', 'Columns from two different parent Tables';
+    
+    throws-like {
+        UpRooted::Relation.new(
+            parent-columns => $schema.table( 't1' ).columns( 'c1', 'c2' ),
+            child-columns => [ $schema.table( 't1' ).column( 'c1' ), $schema.table( 't2' ).column( 'c3' ) ],
+            name => 'r3'
+        );
+    }, Exception, message => 'Child Columns must be from the same Table in Relation r3.', 'Columns from two different child Tables';
+    
+    throws-like {
+        $schema.table( 't1' ).add-child-relation(
+            UpRooted::Relation.new(
+                parent-columns => $schema.table( 't2' ).columns( 'c3' ),
+                child-columns => $schema.table( 't2' ).columns( 'c4' ),
+                name => 'r3'
+            )
+        );
+    }, Exception, message => 'Relation r3 is from different parent Table than t1.', 'Relation is from different parent Table';
 
 }

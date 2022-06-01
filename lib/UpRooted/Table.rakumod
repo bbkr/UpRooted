@@ -35,7 +35,7 @@ Table name that will be second part of fully qualified naming convention C<schem
 has Str $.name is required;
 
 has %!columns;
-has %!child-relations;
+has %!children-relations;
 
 submethod TWEAK {
 
@@ -113,13 +113,56 @@ multi method columns ( ) {
     return %!columns.values.sort: *.order;
 }
 
-# method add-relation( $relation! ) {
-#
-#     die 'Unexpected ', $column.name, $.name, $.schema.name
-#         if %!columns{ $column.name }:exists;
-#
-#     die sprintf 'Relation %s ia already present in Table %s in Schema %s.', $column.name, $.name, $.schema.name
-#         if %!columns{ $column.name }:exists;
-#
-# }
+=begin pod
 
+=head2 add-child-relation
+
+Ties L<UpRooted::Relation> to L<UpRooted::Table>.
+
+This is done automatically when L<UpRooted::Relation> is constructed
+and you should NEVER call this method manually.
+
+=end pod
+
+method add-child-relation( $relation! ) {
+
+    # Relation already checks if all Columns are from the same Table,
+    # no need to check consistency for individual Columns
+    die sprintf 'Relation %s is from different parent Table than %s.', $relation.name, $.name
+        unless $relation.parent-table === self;
+    
+    die sprintf 'Relation %s ia already present in parent Table %s.', $relation.name, $.name
+        if %!children-relations{ $relation.name }:exists;
+
+    %!children-relations{ $relation.name } = $relation;
+
+}
+
+=begin pod
+
+=head2 child-relation( $name )
+
+Returns L<UpRooted::Relation> to child Table of given C<$name>.
+
+=end pod
+
+method child-relation ( Str:D $name! ) {
+    
+    die sprintf 'Relation %s is not present in Table %s.', $name, $.name
+        unless %!children-relations{ $name }:exists;
+    
+    return %!children-relations{ $name };
+}
+
+=begin pod
+
+=head2 children-relations
+
+Returns all L<UpRooted::Relation>s to child Tables in Relation name order.
+
+=end pod
+
+method children-relations (  ) {
+    
+    %!children-relations.values.sort( *.name );
+}

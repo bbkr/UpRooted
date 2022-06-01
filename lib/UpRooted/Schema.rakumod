@@ -74,7 +74,7 @@ Returns all L<UpRooted::Table>s in alphabetical order.
 
 =end pod
 
-method tables {
+method tables ( ) {
     
     return %!tables.values.sort( *.name );
 }
