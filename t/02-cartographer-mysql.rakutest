@@ -1,0 +1,46 @@
+use lib 'lib';
+
+use Test;
+
+try { require ::( 'DBIish' ) }
+plan skip-all => 'DBIish module not installed.' if $!;
+
+use DBIish;
+use UpRooted::Cartographer::MySQL;
+
+my $connection = try {
+    DBIish.connect(
+        'mysql',
+        host => %*ENV{ 'MYSQL_HOST' } // 'mysql',
+        port => %*ENV{ 'MYSQL_PORT' } // 3306,
+        user => %*ENV{ 'MYSQL_USER' } // 'test',
+        password => %*ENV{ 'MYSQL_PASSWORD' } // 'test',
+        database => %*ENV{ 'MYSQL_DATABASE' } // 'test'
+    )
+};
+plan skip-all => 'MySQL connection not established.' if $!;
+
+my $schema;
+lives-ok { $schema = UpRooted::Cartographer::MySQL.new( :$connection ).schema( ) }, 'Schema discovered.';
+
+# TODO add proper tests
+
+=finish
+
+say $schema;
+for $schema.tables -> $table {
+    say "\t", $table;
+    for $table.columns -> $column {
+        say "\t\t", $column;
+    }
+    for $table.children-relations -> $relation {
+        say "\t\t\t", $relation;
+        for $relation.parent-columns -> $column {
+            say "\t\t\t\t", $column;
+        }
+        for $relation.child-columns -> $column {
+            say "\t\t\t\t", $column;
+        }
+        
+    }
+}

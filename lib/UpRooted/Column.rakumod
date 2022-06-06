@@ -36,17 +36,6 @@ has Str $.name is required;
 
 =begin pod
 
-=head2 nullable
-
-Tells if column value can be null.
-This information is very important for proper data extraction!
-
-=end pod
-
-has Bool $.nullable is required;
-
-=begin pod
-
 =head2 type
 
 Hint for output plugin how data should be handled.
@@ -60,6 +49,17 @@ If not given C<Str> is assumed.
 =end pod
 
 has Any:U $.type = Str;
+
+=begin pod
+
+=head2 nullable
+
+Tells if column value can be null.
+This information is very important for proper data extraction!
+
+=end pod
+
+has Bool $.nullable is required;
 
 =begin pod
 
