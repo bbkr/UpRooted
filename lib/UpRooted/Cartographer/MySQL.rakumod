@@ -13,7 +13,7 @@ UpRooted::Cartographer::MySQL
 
 =head1 DESCRIPTION
 
-Discovers L<UpRooted::Schema> from MySQL database.
+Discovers L<UpRooted::Schema> from MySQL database connection.
 Compatible with MySQL, Percona and MariaDB.
 
 =head1 SYNOPSIS
@@ -23,7 +23,7 @@ Compatible with MySQL, Percona and MariaDB.
     my $connection = DBIish.connect( 'mysql', host => ..., port => ..., database => ... );
     my $schema = UpRooted::Cartographer::MySQL.new( :$connection ).schema( );
 
-Note that C<database> MUST be specified for connection.
+Note that C<database> MUST be specified.
 
 =end pod
 
@@ -44,7 +44,10 @@ method schema ( ) {
             AND `table_type` = 'BASE TABLE'     -- exclude system tables and views
     };
     for self!fetch-array-of-hashes( $select-tables ) -> %table {
-        UpRooted::Table.new( :$schema, name => %table{ 'name' } );
+        UpRooted::Table.new(
+            :$schema,
+            name => %table{ 'name' }
+        );
     }
 
     state $select-columns = qq{
@@ -78,7 +81,13 @@ method schema ( ) {
             );
             my $type = %column-types{ %column{ 'type' } }:exists ?? %column-types{ %column{ 'type' } } !! Str;
 
-            UpRooted::Column.new( :$table, name => %column{ 'name' }, :$type, nullable => %column{ 'nullable' }.so, order => %column{ 'order' } );
+            UpRooted::Column.new(
+                :$table,
+                name => %column{ 'name' },
+                :$type,
+                nullable => %column{ 'nullable' }.so,   # MySQL does not support true boolean values
+                order => %column{ 'order' }
+            );
         }
     }
     

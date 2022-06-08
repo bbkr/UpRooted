@@ -26,8 +26,8 @@ First you need to discover database Schema by calling `Cartographer`:
 ```raku
     use UpRooted::Cartographer::MySQL;
 
-    my $dbh = DBIish.connect( 'mysql', host => ..., port => ..., ... );
-    my $schema = UpRooted::Cartographer::MySQL.new( connection => $dbh ).schema( );
+    my $connection = DBIish.connect( 'mysql', host => ..., port => ..., ... );
+    my $schema = UpRooted::Cartographer::MySQL.new( :$connection ).schema( );
 ```
 
 Then `Navigator` must analyze Schema to find out how to reach data in related Tables from given root Table:

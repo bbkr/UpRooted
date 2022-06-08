@@ -18,10 +18,7 @@ Discovery method for specific technology must be implemented in child class.
 
 =head1 SYNOPSIS
 
-    use UpRooted::Cartographer::MySQL;
-
-    my $dbh = DBIish.connect( 'mysql', host => ..., port => ..., ... );
-    my $schema = UpRooted::Cartographer::MySQL.new( connection => $dbh ).schema( );
+Please refer to specific child class for usage details.
 
 =head1 METHODS
 
@@ -29,7 +26,8 @@ Discovery method for specific technology must be implemented in child class.
 
 Returns L<UpRooted::Schema> discovered from given database.
 
-Note that L<UpRooted::Relation>s across multiple L<UpRooted::Schema>s will be skipped and must be added manually if needed.
+Note that L<UpRooted::Relation>s across multiple L<UpRooted::Schema>s
+will be skipped and must be added manually if needed.
 
 =end pod
 
