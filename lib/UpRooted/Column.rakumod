@@ -18,7 +18,7 @@ Represents Column level of relational database.
 
 =head2 table
 
-Which L<UpRooted::Table> this Column belongs to.
+Which L<UpRooted::Table> this L<UpRooted::Column> belongs to.
 
 =end pod
 
@@ -38,11 +38,11 @@ has Str $.name is required;
 
 =head2 type
 
-Hint for output plugin how data should be handled.
+Hint for L<UpRooted::Writer> how data should be handled.
 For example to save binary data to C<.csv> file Base64 encoding may be used
 or to save binary data to C<.sql> file C<UNHEX()> method can be used.
 
-All database types must be coerced to Raku type.
+All database types must be coerced to basic Raku types.
 
 If not given C<Str> is assumed.
 
@@ -54,8 +54,9 @@ has Any:U $.type = Str;
 
 =head2 nullable
 
-Tells if column value can be null.
-This information is very important for proper data extraction!
+Tells if value can be C<NULL>.
+
+Tech note: This information is very important for proper data extraction!
 
 =end pod
 
@@ -65,9 +66,9 @@ has Bool $.nullable is required;
 
 =head2 order
 
-Used for output plugin to save Columns in the same order as in Table in database.
+Used for L<UpRooted::Writer> to save L<UpRooted::Column>s in the same order as defined in database.
 
-Optional. If not given it will be the same order in which Columns are added.
+Optional. If not given it will be the same order in which L<UpRooted::Column>s are added.
 
 =end pod
 

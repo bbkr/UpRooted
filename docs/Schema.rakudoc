@@ -100,5 +100,5 @@ Tree knows how and in which order reach data in all child Tables.
 =head2 Caching
 
 Once Schema is composed it can be reused for deriving multiple Trees.
-Once Tree is derived it can be reused for extracting data
+Once Tree is derived it can be reused for reading data
 for different Columns conditions in root Table.

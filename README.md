@@ -19,34 +19,34 @@ This module is NOT continuous replication tool (like for example Debezium).
 
 ## SYNOPSIS
 
-There are 4 actors involved.
-
-First you need to discover database Schema by calling `Cartographer`:
+First you need to discover database `Schema`:
 
 ```raku
-    use UpRooted::Cartographer::MySQL;
+    use UpRooted::Schema::MySQL;
 
     my $connection = DBIish.connect( 'mysql', host => ..., port => ..., ... );
-    my $schema = UpRooted::Cartographer::MySQL.new( :$connection ).schema( );
+    my $schema = UpRooted::Schema::MySQL.new( :$connection );
 ```
 
-Then `Navigator` must analyze Schema to find out how to reach data in related Tables from given root Table:
+Then `Tree` must be constructed to determine how to reach data in leaf Tables from given root Table:
 
 ```raku
-    use UpRooted::Navigator;
+    use UpRooted::Tree;
 
-    my $tree = UpRooted::Navigator.new( :$schema ).tree( 'users' );
+    my $tree = UpRooted::Tree.new( root-table => $schema.table( 'users' ) );
 ```
+( both `Schema` and `Tree` creation are expensive, you can cache and reuse them )
 
-Actual data is obtained by `Extractor` and stored by `Recorder`.
+Actual data is obtained by `Reader` and stored by `Writer`.
 
 ```raku
-    use UpRooted::Extractor::MySQL;
-    use UpRooted::Recorder::CSV;
+    use UpRooted::Reader::MySQL;
+    use UpRooted::Writer::CSV;
 
-    my $extractor = UpRooted::Extractor::MySQL.new( connection => $dbh, :$tree );
+    my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
+    my $writer = UpRooted::Writer::CSV.new( :!schema-prefix );
     
-    UpRooted::Recorder::CSV.new.store( $extractor.dig( id => 1 ) );
+    $writer.write( $reader.read( id => 1 ) );
 ```
 
 Your user from `users` `Table` with `id = 1` along with all his data from child `Tables` will be stored as set of CSV files:
@@ -58,7 +58,8 @@ Your user from `users` `Table` with `id = 1` along with all his data from child 
 ...
 ```
 
-Keep reading to find out which variants of each actor are available and how to implement your own.
+Keep reading to find out which variants of each module are available, and maybe even how to implement your own.
+
 
 ## METHODS
 

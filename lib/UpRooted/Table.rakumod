@@ -18,7 +18,7 @@ Represents Table level of relational database.
 
 =head2 schema
 
-Which L<UpRooted::Schema> this Table belongs to.
+Which L<UpRooted::Schema> this L<UpRooted::Table> belongs to.
 
 =end pod
 
@@ -104,7 +104,7 @@ multi method columns ( *@names ) {
 
 =head2 columns
 
-Returns all L<UpRooted::Column>s in definition order (if given).
+Returns all L<UpRooted::Column>s in database definition order (if given).
 
 =end pod
 
@@ -142,7 +142,7 @@ method add-child-relation( $relation! ) {
 
 =head2 child-relation( $name )
 
-Returns L<UpRooted::Relation> to child Table of given C<$name>.
+Returns L<UpRooted::Relation> to child L<UpRooted::Table> of given C<$name>.
 
 =end pod
 
@@ -158,11 +158,11 @@ method child-relation ( Str:D $name! ) {
 
 =head2 children-relations
 
-Returns all L<UpRooted::Relation>s to child Tables in Relation name order.
+Returns all L<UpRooted::Relation>s to child L<UpRooted::Table>s in L<UpRooted::Relation> name order.
 
 =end pod
 
-method children-relations (  ) {
+method children-relations ( ) {
     
     %!children-relations.values.sort( *.name );
 }

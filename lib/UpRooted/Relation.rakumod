@@ -18,15 +18,15 @@ Represents Relation (constraint) between Tables in relational database.
         name => 'who-wrote-what'
     );
 
-Amount of parent and child Columns must be the same.
+Amount of parent and child L<UpRooted::Column>s must be the same.
 
 =head1 ATTRIBUTES
 
 =head2 name
 
-Unique name by which Relation is identified.
-Usually this is unique across whole Schema,
-but only uniqueness per Table is required. 
+Unique name by which L<UpRooted::Relation> is identified.
+Usually this is unique across whole database,
+but only uniqueness per L<UpRooted::Table> is required here.
 
 =end pod
 
@@ -88,7 +88,7 @@ method child-table ( ) {
 
 =head2 parent-columns
 
-Returns L<UpRooted::Column>s from parent Table in Relation order.
+Returns L<UpRooted::Column>s from parent L<UpRooted::Table> in database definition order.
 
 =end pod
 
@@ -101,7 +101,7 @@ method parent-columns ( ) {
 
 =head2 child-columns
 
-Returns L<UpRooted::Column>s from child Table in Relation order.
+Returns L<UpRooted::Column>s from child L<UpRooted::Table> in database definition order.
 
 =end pod
 
@@ -114,9 +114,10 @@ method child-columns ( ) {
 
 =head2 nullable
 
-Relation is nullable if any Column from child Table used in this Relation is nullable.
+L<UpRooted::Relation> is nullable if any L<UpRooted::Column>
+from child L<UpRooted::Table> used in this L<UpRooted::Relation> is nullable.
 
-Not nullable relations are extremely important for data extraction
+Tech note: Not nullable Relations are extremely important for data extraction
 because it is guaranteed to discover all rows in child Table in given Tree
 by following this Relation from all rows in parent Table.
 
