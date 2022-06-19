@@ -1,8 +1,8 @@
-unit role UpRooted::Cartographer::Source::DBIish;
+unit role UpRooted::Schema::DBIish;
 
 use DBIish;
 
-has $.connection is required;
+has $.connection;
 
 method !fetch-array-of-hashes ( Str:D $query, *@params ) {
     

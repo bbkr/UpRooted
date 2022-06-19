@@ -6,7 +6,7 @@ try { require ::( 'DBIish' ) }
 plan skip-all => 'DBIish module not installed.' if $!;
 
 use DBIish;
-use UpRooted::Cartographer::MySQL;
+use UpRooted::Schema::MySQL;
 
 my $connection = try {
     DBIish.connect(
@@ -21,11 +21,9 @@ my $connection = try {
 plan skip-all => 'MySQL connection not established.' if $!;
 
 my $schema;
-lives-ok { $schema = UpRooted::Cartographer::MySQL.new( :$connection ).schema( ) }, 'Schema discovered.';
+lives-ok { $schema = UpRooted::Schema::MySQL.new( :$connection ) }, 'Schema discovered.';
 
 # TODO add proper tests
-
-=finish
 
 say $schema;
 for $schema.tables -> $table {

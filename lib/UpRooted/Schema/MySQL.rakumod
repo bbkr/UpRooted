@@ -1,15 +1,15 @@
-use UpRooted::Cartographer;
-use UpRooted::Cartographer::Source::DBIish;
+use UpRooted::Schema;
+use UpRooted::Table;
+use UpRooted::Column;
+use UpRooted::Relation;
 
-unit class UpRooted::Cartographer::MySQL
-is UpRooted::Cartographer
-does UpRooted::Cartographer::Source::DBIish;
+unit class UpRooted::Schema::MySQL is UpRooted::Schema;
 
 =begin pod
 
 =head1 NAME
 
-UpRooted::Cartographer::MySQL
+UpRooted::Schema::MySQL
 
 =head1 DESCRIPTION
 
@@ -18,24 +18,25 @@ Compatible with MySQL, Percona and MariaDB.
 
 =head1 SYNOPSIS
 
-    use UpRooted::Cartographer::MySQL;
+    use UpRooted::Schema::MySQL;
 
     my $connection = DBIish.connect( 'mysql', host => ..., port => ..., database => ... );
-    my $schema = UpRooted::Cartographer::MySQL.new( :$connection ).schema( );
+    my $schema = UpRooted::Schema::MySQL.new( :$connection );
 
-Note that C<database> MUST be specified.
+Note that C<database> MUST be specified for connection.
+
+Connection is only used during construction
+and may be closed after L<UpRooted::Schema> is created.
 
 =end pod
 
-method schema ( ) {
-    my $schema;
+method new ( :$connection! ) {
     
     state $select-schema = q{
         SELECT DATABASE( ) AS name
     };
-    $schema = UpRooted::Schema.new(
-        name => self!fetch-array-of-hashes( $select-schema )[ 0 ]{ 'name' }
-    );
+    
+    my $schema = self.bless( name => self!fetch-array-of-hashes( $connection, $select-schema )[ 0 ]{ 'name' } );
     
     state $select-tables = q{
         SELECT `table_name` AS `name`
@@ -43,7 +44,7 @@ method schema ( ) {
         WHERE `table_schema` = DATABASE( )
             AND `table_type` = 'BASE TABLE'     -- exclude system tables and views
     };
-    for self!fetch-array-of-hashes( $select-tables ) -> %table {
+    for self!fetch-array-of-hashes( $connection, $select-tables ) -> %table {
         UpRooted::Table.new(
             :$schema,
             name => %table{ 'name' }
@@ -59,7 +60,7 @@ method schema ( ) {
             AND `table_name` IN ( $select-tables )  -- exclude columns from views
         ORDER BY `table_name`
     };
-    for self!fetch-array-of-hashes( $select-columns ).classify( *{ 'table_name' } ).kv -> $table_name, @columns {
+    for self!fetch-array-of-hashes( $connection, $select-columns ).classify( *{ 'table_name' } ).kv -> $table_name, @columns {
 
         my $table := $schema.table( $table_name );
 
@@ -90,7 +91,7 @@ method schema ( ) {
             );
         }
     }
-    
+
     state $select-relations = q{
         SELECT `constraint_name` AS `name`,
             `referenced_table_name` AS `parent_table_name`, `referenced_column_name` AS `parent_column_name`,
@@ -101,20 +102,30 @@ method schema ( ) {
             AND `position_in_unique_constraint` IS NOT NULL     -- skip everything that is not foreign key
         ORDER BY `constraint_name`, `position_in_unique_constraint`
     };
-    for self!fetch-array-of-hashes( $select-relations ).classify( *{ 'name' } ).kv -> $relation_name, @columns {
-        
+    for self!fetch-array-of-hashes( $connection, $select-relations ).classify( *{ 'name' } ).kv -> $relation_name, @columns {
+
         # it is impossible in MySQL to have foreign key of given name referencing two different Tables
         # so it is safe to take parent and child Table names from first Column set
         my $parent-table := $schema.table( @columns.first{ 'parent_table_name' } );
         my $child-table := $schema.table( @columns.first{ 'child_table_name' } );
-        
+
         UpRooted::Relation.new(
             parent-columns => $parent-table.columns( @columns.map: *{ 'parent_column_name' } ),
             child-columns => $child-table.columns( @columns.map: *{ 'child_column_name' } ),
             name => $relation_name
         );
-        
+
     }
     
     return $schema;
 }
+
+method !fetch-array-of-hashes ( $connection, Str:D $query, *@params ) {
+    
+    my $statement = $connection.execute( $query, |@params );
+    my @data = $statement.allrows( :array-of-hash );
+    $statement.dispose( );
+    
+    return @data;
+}
+
