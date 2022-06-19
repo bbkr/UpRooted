@@ -85,7 +85,7 @@ method schema ( ) {
                 :$table,
                 name => %column{ 'name' },
                 :$type,
-                nullable => %column{ 'nullable' }.so,   # MySQL does not support true boolean values
+                nullable => %column{ 'nullable' }.so,   # cast because MySQL does not support true boolean values
                 order => %column{ 'order' }
             );
         }

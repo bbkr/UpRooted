@@ -122,17 +122,17 @@ how and in which order to reach leaf L<UpRooted::Table>.
 
 =end pod
 
-method analyze-relations ( :@relations where { .elems } ) {
+method analyze-relations ( *@relations where { .elems } ) {
     
     die sprintf 'Relations root Table is different than %s.', $.root-table.name
-        unless @relations.first.parent-table === $.root-table;
+        unless @relations.head.parent-table === $.root-table;
     
     for @relations.rotor( 2 => -1 ) -> ( $a, $b ) {
-        die sprintf 'Relations are not consistent.'
+        die sprintf 'Parent Relation %s and child Relation %s are not referring to the same Table.', $a.name, $b.name
             unless $a.child-table === $b.parent-table;
     }
     
     die sprintf 'Relations leaf Table is different than %s.', $.leaf-table.name
-        unless @relations.last.child-table === $.leaf-table;
+        unless @relations.tail.child-table === $.leaf-table;
     
 }

@@ -8,7 +8,7 @@ use UpRooted::Column;
 use UpRooted::Relation;
 use UpRooted::Path;
 
-plan 4;
+plan 3;
 
 subtest 'path single node' => {
 
@@ -40,5 +40,44 @@ subtest 'path without relations' => {
     throws-like {
         $path.relations;
     }, Exception, message => 'No Relations in Path between Table t1 and Table t2.', 'Path must have Relations between Tables.';
+    
+};
+
+subtest 'path with inconsistent relations' => {
+
+    plan 3;
+    
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c2', :!nullable );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c1' ),
+        name => 'r1'
+    );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't3' ).columns( 'c2' ),
+        name => 'r2'
+    );
+    
+    my $path = UpRooted::Path.new( root-table => $schema.table( 't1'), leaf-table => $schema.table( 't3') );
+    
+    throws-like {
+        $path.analyze-relations( $schema.table( 't2' ).child-relation( 'r2' ) );
+    }, Exception, message => 'Relations root Table is different than t1.', 'Relations chain must start in root Table';
+    
+    throws-like {
+        $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ), $schema.table( 't1' ).child-relation( 'r1' )  );
+    }, Exception, message => 'Parent Relation r1 and child Relation r1 are not referring to the same Table.', 'Relations chain must refer to consistent Tables';
+    
+    throws-like {
+        $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ) );
+    }, Exception, message => 'Relations leaf Table is different than t3.', 'Relations chain must end in leaf Table';
     
 };
