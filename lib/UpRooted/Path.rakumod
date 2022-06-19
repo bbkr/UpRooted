@@ -67,7 +67,6 @@ from root L<UpRooted::Table> to leaf L<UpRooted::Table>.
 
 has $.order = 0;
 
-
 =begin pod
 
 =head2 relations
@@ -113,6 +112,20 @@ method relations {
 
 =begin pod
 
+=head2 nullable
+
+Path is nullable if any L<UpRooted::Relation> in it is nullable.
+Can be called only after any L<UpRooted::Relation>s chain is established.
+
+=end pod
+
+method nullable {
+    
+    return so self.relations.first: *.nullable;
+}
+
+=begin pod
+
 =head1 METHODS
 
 =head2 analyze-relations
@@ -134,5 +147,10 @@ method analyze-relations ( *@relations where { .elems } ) {
     
     die sprintf 'Relations leaf Table is different than %s.', $.leaf-table.name
         unless @relations.tail.child-table === $.leaf-table;
+    
+    # bump order to longest analyzed Relations chain
+    $!order max= @relations.elems;
+    
+    
     
 }
