@@ -8,23 +8,22 @@ use UpRooted::Column;
 use UpRooted::Relation;
 use UpRooted::Path;
 
-plan 3;
+plan 6;
 
 subtest 'path single node' => {
 
-    plan 3;
+    plan 2;
     
     my $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
     
     my $path;
     lives-ok {
-        $path = UpRooted::Path.new( root-table => $schema.table( 't1'), leaf-table => $schema.table( 't1') );
+        $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
     }, 'Path created';
     
     is-deeply $path.relations, [], 'No Relations between root Table that is also leaf Table';
     
-    is $path.order, 0, 'Order is 0 for root Table.'
 };
 
 subtest 'path without relations' => {
@@ -35,7 +34,7 @@ subtest 'path without relations' => {
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
     
-    my $path = UpRooted::Path.new( root-table => $schema.table( 't1'), leaf-table => $schema.table( 't2') );
+    my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     
     throws-like {
         $path.relations;
@@ -66,7 +65,7 @@ subtest 'path with inconsistent relations' => {
         name => 'r2'
     );
     
-    my $path = UpRooted::Path.new( root-table => $schema.table( 't1'), leaf-table => $schema.table( 't3') );
+    my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     
     throws-like {
         $path.analyze-relations( $schema.table( 't2' ).child-relation( 'r2' ) );
@@ -80,4 +79,168 @@ subtest 'path with inconsistent relations' => {
         $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ) );
     }, Exception, message => 'Relations leaf Table is different than t3.', 'Relations chain must end in leaf Table';
     
+};
+
+subtest 'path nullability' => {
+    
+    plan 3;
+    
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c2', :nullable );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c1' ),
+        name => 'r1'
+    );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't3' ).columns( 'c2' ),
+        name => 'r2'
+    );
+
+    my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
+    ok !$path.nullable, 'Path between root Table that is also leaf Table is never nullable';
+    
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
+    $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ) );
+    ok !$path.nullable, 'Path has no nullable Relations';
+    
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ), $schema.table( 't2' ).child-relation( 'r2' ),  );
+    ok $path.nullable, 'Path has nullable Relations';
+
+};
+
+subtest 'path relations analyze' => {
+    
+    plan 7;
+    
+    # there are 3 tables: t1, t2, t3
+    # t1->t2, t1->t3, t2->t3 are connected by both nullable and not nullable relations
+    # (it makes no sense in real schema but makes compact test one)
+    
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c3', :nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c4', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c5', :nullable );
+    my $relation_t1_t2_not_nullable = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r1'
+    );
+    my $relation_t1_t2_nullable = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c3' ),
+        name => 'r2'
+    );
+    my $relation_t1_t3_not_nullable = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't3' ).columns( 'c4' ),
+        name => 'r3'
+    );
+    my $relation_t1_t3_nullable = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't3' ).columns( 'c5' ),
+        name => 'r4'
+    );
+    my $relation_t2_t3_not_nullable = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't3' ).columns( 'c4' ),
+        name => 'r5'
+    );
+    my $relation_t2_t3_nullable = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't3' ).columns( 'c5' ),
+        name => 'r6'
+    );
+    
+    my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
+    $path.analyze-relations( $relation_t1_t2_nullable );
+    is-deeply $path.relations, [ $relation_t1_t2_nullable ], 'Any Relation is better than none';
+    
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    $path.analyze-relations( $relation_t1_t2_nullable, $relation_t2_t3_nullable );
+    $path.analyze-relations( $relation_t1_t3_nullable );
+    is-deeply $path.relations, [ $relation_t1_t3_nullable ], 'Shorter nullable Relations are better than longer nullable ones';
+    
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    $path.analyze-relations( $relation_t1_t3_nullable );
+    $path.analyze-relations( $relation_t1_t2_nullable, $relation_t2_t3_nullable );
+    is-deeply $path.relations, [ $relation_t1_t3_nullable ], 'Longer nullable Relations are not better than shorter nullable ones';
+
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    $path.analyze-relations( $relation_t1_t3_nullable );
+    $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
+    is-deeply $path.relations, [ $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable ], 'Not nullable Relations are always better than nullable ones, regardless of length';
+
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
+    $path.analyze-relations( $relation_t1_t3_nullable );
+    is-deeply $path.relations, [ $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable ], 'Nullable Relations are always worse than not nullable ones, regardless of length';
+
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
+    $path.analyze-relations( $relation_t1_t3_not_nullable );
+    is-deeply $path.relations, [ $relation_t1_t3_not_nullable ], 'Shorter not nullable Relations are better than longer not nullable ones';
+    
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    $path.analyze-relations( $relation_t1_t3_not_nullable );
+    $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
+    is-deeply $path.relations, [ $relation_t1_t3_not_nullable ], 'Longer not nullable Relations are not better than shorter not nullable ones';
+
+};
+
+subtest 'path order' => {
+    
+    plan 4;
+    
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!nullable );
+    my $relation_t1_t2 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r1'
+    );
+    my $relation_t1_t3 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't3' ).columns( 'c3' ),
+        name => 'r2'
+    );
+    my $relation_t2_t3 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't3' ).columns( 'c3' ),
+        name => 'r3'
+    );
+    
+    my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
+    is $path.order, 0, 'Order is 0 for root Table.';
+    
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
+    throws-like {
+        $path.order;
+    }, Exception, message => 'No Relations in Path between Table t1 and Table t2.', 'Order must have Relations between Tables.';
+    
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    $path.analyze-relations( $relation_t1_t2, $relation_t2_t3 );
+    is $path.order, 2, 'Order set to longest Relations';
+    
+    $path.analyze-relations( $relation_t1_t3 );
+    ok $path.order > $path.relations.elems, 'Order never decreases even if shorter Relations are found';
+
 };

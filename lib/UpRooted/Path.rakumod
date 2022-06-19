@@ -65,7 +65,15 @@ from root L<UpRooted::Table> to leaf L<UpRooted::Table>.
 
 =end pod
 
-has $.order = 0;
+has $!order = 0;
+
+method order ( ) {
+    
+    # verify if Relations are established
+    sink self.relations;
+    
+    return $!order;
+}
 
 =begin pod
 
@@ -102,7 +110,7 @@ before they join at L<UpRooted::Table> C<B>.
 
 has @!relations;
 
-method relations {
+method relations ( ) {
     
     die sprintf 'No Relations in Path between Table %s and Table %s.', $.root-table.name, $.leaf-table.name
         unless $.root-table === $.leaf-table or @!relations;
@@ -119,7 +127,7 @@ Can be called only after any L<UpRooted::Relation>s chain is established.
 
 =end pod
 
-method nullable {
+method nullable ( ) {
     
     return so self.relations.first: *.nullable;
 }
@@ -132,6 +140,10 @@ method nullable {
 
 Check if new chain of L<UpRooted::Relation>s gives additional insight
 how and in which order to reach leaf L<UpRooted::Table>.
+
+Will return C<True> if Tree can proceed.
+Or C<False> to indicate that loop occured
+and this L<UpRooted::Relation>s chain should not be analyzed further.
 
 =end pod
 
@@ -148,9 +160,54 @@ method analyze-relations ( *@relations where { .elems } ) {
     die sprintf 'Relations leaf Table is different than %s.', $.leaf-table.name
         unless @relations.tail.child-table === $.leaf-table;
     
+    
+    # TODO loop detection
+    
     # bump order to longest analyzed Relations chain
     $!order max= @relations.elems;
     
+    if @!relations.elems.not {
+
+        # any Relations chain is better than none
+        @!relations = @relations;
+        
+    }
+    elsif self.nullable {
+        
+        if so @relations.first: *.nullable {
+        
+            # TODO check for horse riddle
+            
+            # shorter nullable Relations chain is better than longer nullable one
+            @!relations = @relations if @relations.elems < @!relations.elems;
+
+        }
+        else {
+
+            # not nullable Relations chain is always better than nullable one, regardless of length
+            @!relations = @relations;
+            
+            # TODO clear horse riddle flag if any
+        
+        }
     
+    }
+    else {
     
+        if so @relations.first: *.nullable {
+        
+            # do nothing,
+            # nullable Relations chain is worse than not nullable one, regardless of length
+
+        }
+        else {
+
+            # shorter not nullable Relations chain is better than longer not nullable one
+            @!relations = @relations if @relations.elems < @!relations.elems;
+        
+        }
+    
+    }
+    
+    return True;    
 }
