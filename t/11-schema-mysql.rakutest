@@ -20,10 +20,14 @@ my $connection = try {
 };
 plan skip-all => 'MySQL connection not established.' if $!;
 
+plan 1;
+
 my $schema;
 lives-ok { $schema = UpRooted::Schema::MySQL.new( :$connection ) }, 'Schema discovered.';
 
 # TODO add proper tests
+
+=finish
 
 say $schema;
 for $schema.tables -> $table {
