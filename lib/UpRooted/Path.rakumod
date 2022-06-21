@@ -77,6 +77,58 @@ method order ( ) {
 
 =begin pod
 
+=head2 looped
+
+Looped L<UpRooted::Path> means that leaf L<UpRooted::Table>
+occured in L<UpRooted::Relation>s chain as parent L<UpRooted::Table>.
+
+Such data can be safely reached by L<UpRooted::Reader>
+but there is no guarantee that it can be saved by all L<UpRooted::Writer>s.
+For example there may be foreign keys issues when feeding it directly to other database
+despite correct overall data consistency.
+
+Sample looped L<UpRooted::Path>s following root to leaf:
+
+    A -------> A
+
+    A -------> B
+    A <------- B
+
+    A -------> B
+         B -------> B
+
+Loops should not be processed further by L<UpRooteed::Tree> to avoid... infinite loop :)
+In case of loop being detected C<False> must be returned by L<UpRooteed::Path::analyze-relations> as circuit breaker.
+
+Tech note: Only leaf L<UpRooted::Table> is important, those are NOT looped paths from A to C:
+
+    A -------> B -------> C
+    A <------- B
+
+    A -------> B -------> C
+          B -------> B
+
+And they should never be analyzed. If they are encountered during analysis
+it means L<UpRooteed::Tree> did not stop properly.
+
+=end pod
+
+has $!looped = False;
+
+method looped ( ) {
+    
+    # if for any reason looped Relations chain was analyzed first
+    # then Path is known to be looped without Relations between root and leaf Tables established
+    return $!looped if $!looped;
+    
+    # verify if Relations are established
+    sink self.relations;
+    
+    return $!looped;
+}
+
+=begin pod
+
 =head2 relations
 
 Describes how to reach leaf L<UpRooted::Table> from root L<UpRooted::Table>.
@@ -157,11 +209,20 @@ method analyze-relations ( *@relations where { .elems } ) {
             unless $a.child-table === $b.parent-table;
     }
     
+    for @relations[ ^( @relations.elems - 1 ) ] {
+        state %parents;
+        %parents{ .parent-table.name } = True;
+        die sprintf 'Table %s seen twice before reaching leaf Table.', .child-table.name
+            if %parents{ .child-table.name }:exists;
+    }
+        
     die sprintf 'Relations leaf Table is different than %s.', $.leaf-table.name
         unless @relations.tail.child-table === $.leaf-table;
     
-    
-    # TODO loop detection
+    if @relations.first: *.parent-table === $.leaf-table {
+        $!looped = True;
+        return False;
+    }
     
     # bump order to longest analyzed Relations chain
     $!order max= @relations.elems;
