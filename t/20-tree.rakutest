@@ -7,8 +7,9 @@ use UpRooted::Table;
 use UpRooted::Column;
 use UpRooted::Relation;
 use UpRooted::Path;
+use UpRooted::Tree;
 
-plan 7;
+plan 9;
 
 subtest 'path single node' => {
 
@@ -313,4 +314,122 @@ subtest 'path loops' => {
     is $path.analyze-relations( $relation_t1_t2 ), True, 'No loop detected';
     is $path.looped, True, 'Path is still marked as looped';
     
+};
+
+# helper to convert Tree to Table names for easy testing
+sub path-to-tables ( $tree ) {
+    my @path;
+    
+    for $tree.paths -> $path {
+        push @path, [ $path.root-table.name, |$path.relations.map: *.child-table.name ];
+    }
+    
+    return @path;
+}
+
+subtest 'tree basics' => {
+    
+    plan 4;
+    
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!nullable );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r1'
+    );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't3' ).columns( 'c3' ),
+        name => 'r2'
+    );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't3' ).columns( 'c3' ),
+        name => 'r2'
+    );
+
+    my $tree = UpRooted::Tree.new( root-table => $schema.table( 't3' ) );
+    is-deeply path-to-tables( $tree ), [ [ 't3' ], ], 'Root table Path';
+    
+    $tree = UpRooted::Tree.new( root-table => $schema.table( 't2' ) );
+    is-deeply path-to-tables( $tree ), [ [ 't2' ], [ 't2', 't3' ] ], 'Linear Paths';
+    
+    # both t2 and t3 may be reached in the best way from t1,
+    # but t2 must be reached first as t3 depends on t2
+    $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ], [ 't1', 't3' ] ], 'Diamond Paths';
+    ok [<]( $tree.paths.map: *.order ), 'Paths have correct order';
+    
+};
+
+subtest 'tree loops' => {
+    
+    plan 3;
+
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't1' ).columns( 'c1' ),
+        name => 'r1'
+    );
+
+    # loop is t1 -> t1
+    my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], ], 'Short looped Path';
+
+    $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r1'
+    );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't1' ).columns( 'c1' ),
+        name => 'r2'
+    );
+
+    # loop is t1 -> t2 -> t1
+    $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ] ], 'Long looped Path';
+
+    $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!nullable );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r1'
+    );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't3' ).columns( 'c3' ),
+        name => 'r2'
+    );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r3'
+    );
+
+    # longest Path is t1 -> t2 -> t3, but loop is t2 -> t2
+    $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ], [ 't1', 't2', 't3' ] ], 'Inter looped Path';
+
 };
