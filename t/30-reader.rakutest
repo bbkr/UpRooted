@@ -1,0 +1,78 @@
+use lib 'lib';
+
+use Test;
+
+use UpRooted::Schema;
+use UpRooted::Table;
+use UpRooted::Column;
+use UpRooted::Relation;
+use UpRooted::Path;
+use UpRooted::Tree;
+use UpRooted::Reader;
+
+plan 2;
+
+class UpRooted::Reader::Dummy does UpRooted::Reader {
+
+    # emulate returning dummy rows from each leaf Table
+    method !read ( $path, %conditions ) {
+        
+        my $table = $path.leaf-table;
+        
+        # emulate root Column matching conditions, otherwise return whatever
+        my %row = $path.leaf-table.columns.map: { .name => %conditions{ .name } // '*' };
+        
+        # emulate more rows as Relations chain gets longer
+        state $calls = 0;
+        take %row for ^(++$calls);
+    }
+}
+
+subtest 'no implementation' => {
+    
+    plan 1;
+    
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    my $tree = UpRooted::Tree.new( root-table => UpRooted::Table.new( :$schema, name => 't1' ) );
+    
+    dies-ok { gather UpRooted::Reader.new( :$tree ).read( ) }, 'Reader must have implementation';
+
+};
+
+subtest 'tree paths' => {
+    
+    plan 9;
+    
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c4', :!nullable );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r1'
+    );
+    UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c2' ),
+        child-columns => $schema.table( 't3' ).columns( 'c3' ),
+        name => 'r2'
+    );
+    my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+    
+    my $reader = UpRooted::Reader::Dummy.new( :$tree );
+    my @data = gather $reader.read( c1 => 1 );
+    
+    is @data.shift, $schema.table( 't1' ), 'Root table';
+    is-deeply @data.shift, { 'c1' => 1 }, 'Root row';
+    
+    is @data.shift, $schema.table( 't2' ), 'Leaf table';
+    is-deeply @data.shift, { 'c2' => '*' }, 'Leaf row' for ^2;
+    
+    is @data.shift, $schema.table( 't3' ), 'Leaf table';
+    is-deeply @data.shift, { 'c3' => '*', 'c4' => '*' }, 'Leaf row' for ^3;
+    
+};
