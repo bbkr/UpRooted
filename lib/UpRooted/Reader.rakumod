@@ -49,6 +49,9 @@ This list can be C<gather>ed by L<UpRooted::Writer>.
 
 method read ( *%conditions ) {
     
+    # conditions must match Columns in root Table
+    sink $.tree.root-table.column( $_ ) for %conditions.keys;
+    
     # all Paths will be returned in order that satisfies parent-child Tables dependencies
     for $.tree.paths -> $path {
         

@@ -41,7 +41,7 @@ subtest 'no implementation' => {
 
 subtest 'tree paths' => {
     
-    plan 9;
+    plan 10;
     
     my $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
@@ -62,8 +62,12 @@ subtest 'tree paths' => {
         name => 'r2'
     );
     my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
-    
     my $reader = UpRooted::Reader::Dummy.new( :$tree );
+    
+    throws-like {
+        gather $reader.read( x1 => 1 );
+    }, Exception, message => 'Column x1 is not present in Table t1.', 'Columns from conditions must be present in root Table';
+    
     my @data = gather $reader.read( c1 => 1 );
     
     is @data.shift, $schema.table( 't1' ), 'Root table';
