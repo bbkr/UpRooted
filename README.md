@@ -46,7 +46,7 @@ Actual data is obtained by `Reader` and stored by `Writer`.
     my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
     my $writer = UpRooted::Writer::CSV.new( :!schema-prefix );
     
-    $writer.write( id => 1 );
+    $writer.write( :$reader, id => 1 );
 ```
 
 Your user from `users` `Table` with `id = 1` along with all his data from child `Tables` will be stored as set of CSV files:
