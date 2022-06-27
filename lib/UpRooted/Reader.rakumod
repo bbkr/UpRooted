@@ -15,6 +15,7 @@ Requires specific implementation for given database type.
 =head1 SYNOPSIS
 
     my $reader = UpRooted::Reader.new( :$tree );
+
     for gather $reader.read( id => 1 ) {
         if $_ ~~ UpRooted::Table {
             say 'In Table ' ~ .name;

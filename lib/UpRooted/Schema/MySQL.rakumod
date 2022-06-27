@@ -28,28 +28,32 @@ Note that C<database> MUST be specified for connection.
 Connection is only used during construction
 and may be closed after L<UpRooted::Schema> is created.
 
-=head1 WARNING
-
-When modyfying this implementation remember that:
+=head1 CASE SENSITIVITY WARNINGS
 
 Column names in C<information_schema> have different case in various MySQL implementations.
 Always alias columns to have lowercased names as Hash keys.
+For example:
 
-MySQL has case insensitive C<information_schema> lookups while L<UpRooted::*> is case sensitive.
-Always convert values to lowercae variants to avoid weird errors.
+    SELECT `sth` AS `sth` FROM `information_schema`.`sth` ...
+
+UpRooted is always case sensitive in every aspect.
+For example you can register two L<UpRooted::Table>s named C<foo> and C<Foo> in the same L<UpRooted::Schema>.
+Or register two L<UpRooted::Column>s named C<bar> and C<Bar> in the same L<UpRooted::Table>.
+While MySQL has always case insensitive columns, but tables case sensitivity depends on underlying system.
+Always preserve cases of original names.
 
 =end pod
 
 method new ( :$connection! ) {
     
     state $select-schema = q{
-        SELECT LOWER( DATABASE( ) ) AS name
+        SELECT DATABASE( ) AS name
     };
     
     my $schema = self.bless( name => self!fetch-array-of-hashes( $connection, $select-schema )[ 0 ]{ 'name' } );
     
     state $select-tables = q{
-        SELECT LOWER( `table_name` ) AS `name`
+        SELECT `table_name` AS `name`
         FROM `information_schema`.`tables`
         WHERE `table_schema` = DATABASE( )
             AND `table_type` = 'BASE TABLE'     -- exclude system tables and views
@@ -62,9 +66,9 @@ method new ( :$connection! ) {
     }
 
     state $select-columns = qq{
-        SELECT LOWER( `column_name` ) AS `name`, LOWER( `table_name` ) AS `table_name`,
+        SELECT `column_name` AS `name`, `table_name` AS `table_name`,
             IF( `is_nullable` = 'YES', TRUE, FALSE ) AS `nullable`,
-            LOWER( `data_type` ) AS `type`, `ordinal_position` AS `order`
+            `data_type` AS `type`, `ordinal_position` AS `order`
         FROM `information_schema`.`columns`
         WHERE `table_schema` = DATABASE( )
             AND `table_name` IN ( $select-tables )  -- exclude columns from views
@@ -103,9 +107,9 @@ method new ( :$connection! ) {
     }
 
     state $select-relations = q{
-        SELECT LOWER( `constraint_name` ) AS `name`,
-            LOWER( `referenced_table_name` ) AS `parent_table_name`, LOWER( `referenced_column_name` ) AS `parent_column_name`,
-            LOWER( `table_name` ) AS `child_table_name`, LOWER( `column_name` ) AS `child_column_name`
+        SELECT `constraint_name` AS `name`,
+            `referenced_table_name` AS `parent_table_name`, `referenced_column_name` AS `parent_column_name`,
+            `table_name` AS `child_table_name`, `column_name` AS `child_column_name`
         FROM `information_schema`.`key_column_usage`
         WHERE `table_schema` = DATABASE( )
             AND `referenced_table_schema` = DATABASE( )         -- cross schema relations not supported here
