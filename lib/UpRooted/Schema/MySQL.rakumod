@@ -28,18 +28,28 @@ Note that C<database> MUST be specified for connection.
 Connection is only used during construction
 and may be closed after L<UpRooted::Schema> is created.
 
+=head1 WARNING
+
+When modyfying this implementation remember that:
+
+Column names in C<information_schema> have different case in various MySQL implementations.
+Always alias columns to have lowercased names as Hash keys.
+
+MySQL has case insensitive C<information_schema> lookups while L<UpRooted::*> is case sensitive.
+Always convert values to lowercae variants to avoid weird errors.
+
 =end pod
 
 method new ( :$connection! ) {
     
     state $select-schema = q{
-        SELECT DATABASE( ) AS name
+        SELECT LOWER( DATABASE( ) ) AS name
     };
     
     my $schema = self.bless( name => self!fetch-array-of-hashes( $connection, $select-schema )[ 0 ]{ 'name' } );
     
     state $select-tables = q{
-        SELECT `table_name` AS `name`
+        SELECT LOWER( `table_name` ) AS `name`
         FROM `information_schema`.`tables`
         WHERE `table_schema` = DATABASE( )
             AND `table_type` = 'BASE TABLE'     -- exclude system tables and views
@@ -52,7 +62,7 @@ method new ( :$connection! ) {
     }
 
     state $select-columns = qq{
-        SELECT `column_name` AS `name`, `table_name`,
+        SELECT LOWER( `column_name` ) AS `name`, LOWER( `table_name` ) AS `table_name`,
             IF( `is_nullable` = 'YES', TRUE, FALSE ) AS `nullable`,
             LOWER( `data_type` ) AS `type`, `ordinal_position` AS `order`
         FROM `information_schema`.`columns`
@@ -93,9 +103,9 @@ method new ( :$connection! ) {
     }
 
     state $select-relations = q{
-        SELECT `constraint_name` AS `name`,
-            `referenced_table_name` AS `parent_table_name`, `referenced_column_name` AS `parent_column_name`,
-            `table_name` AS `child_table_name`, `column_name` AS `child_column_name`
+        SELECT LOWER( `constraint_name` ) AS `name`,
+            LOWER( `referenced_table_name` ) AS `parent_table_name`, LOWER( `referenced_column_name` ) AS `parent_column_name`,
+            LOWER( `table_name` ) AS `child_table_name`, LOWER( `column_name` ) AS `child_column_name`
         FROM `information_schema`.`key_column_usage`
         WHERE `table_schema` = DATABASE( )
             AND `referenced_table_schema` = DATABASE( )         -- cross schema relations not supported here
