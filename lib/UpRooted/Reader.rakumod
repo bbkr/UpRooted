@@ -42,7 +42,10 @@ has $.tree is required;
 =head2 read
 
 Returns lazy list of L<UpRooted::Table>s, each one is followed by rows selected from it.
+Rows are in form of Array of values in the same order as L<UpRooted::Column>s in each L<UpRooted::Table>.
+
 Accepts conditions for root L<UpRooted::Table>.
+Conditions must have defined values and C<=> operator will be used to evaluate them.
 
 This list can be C<gather>ed by L<UpRooted::Writer>.
 

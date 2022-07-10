@@ -20,11 +20,11 @@ class UpRooted::Reader::Dummy does UpRooted::Reader {
         my $table = $path.leaf-table;
         
         # emulate root Column matching conditions, otherwise return whatever
-        my %row = $path.leaf-table.columns.map: { .name => %conditions{ .name } // '*' };
+        my @row = $path.leaf-table.columns.map: { %conditions{ .name } // '*' };
         
         # emulate more rows as Relations chain gets longer
         state $calls = 0;
-        take %row for ^(++$calls);
+        take @row for ^(++$calls);
     }
 }
 
@@ -71,12 +71,12 @@ subtest 'tree paths' => {
     my @data = gather $reader.read( c1 => 1 );
     
     is @data.shift, $schema.table( 't1' ), 'Root table';
-    is-deeply @data.shift, { 'c1' => 1 }, 'Root row';
+    is-deeply @data.shift, [ 1 ], 'Root row';
     
     is @data.shift, $schema.table( 't2' ), 'Leaf table';
-    is-deeply @data.shift, { 'c2' => '*' }, 'Leaf row' for ^2;
+    is-deeply @data.shift, [ '*' ], 'Leaf row' for ^2;
     
     is @data.shift, $schema.table( 't3' ), 'Leaf table';
-    is-deeply @data.shift, { 'c3' => '*', 'c4' => '*' }, 'Leaf row' for ^3;
+    is-deeply @data.shift, [ '*', '*' ], 'Leaf row' for ^3;
     
 };
