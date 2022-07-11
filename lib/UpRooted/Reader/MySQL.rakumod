@@ -76,7 +76,7 @@ method !read ( $path, %conditions ) {
     my $query = ( $query-select, $query-from, $query-where ).join( ' ' );
 
     my $statement = $!connection.execute( $query );
-    while my @row = $statement.row( ) {
+    while my @row := $statement.row( ) {
         take @row;
     }
     $statement.dispose( );

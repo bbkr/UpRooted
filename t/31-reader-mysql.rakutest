@@ -1,0 +1,49 @@
+use lib 'lib';
+use lib 't/lib';
+
+use Test;
+
+use DBITest;
+use UpRooted::Schema::MySQL;
+use UpRooted::Tree;
+use UpRooted::Reader::MySQL;
+
+my $connection = connect( 'mysql' );
+load( $connection, 'mysql', 'cleanup.sql' );
+load( $connection, 'mysql', 'schema.sql' );
+
+plan 2;
+
+my $schema = UpRooted::Schema::MySQL.new( :$connection );
+my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
+
+subtest 'no data' => {
+
+    plan 1;
+
+    my @result = gather $reader.read( );
+    ok all( @result ) ~~ UpRooted::Table, 'Empty Tables';
+    
+};
+
+subtest 'with data' => {
+
+    plan 1;
+
+    load( $connection, 'mysql', 'data.sql' );
+
+    my @result = gather $reader.read( id => 1 );
+    is @result.shift.name, 't1', 'Root table';
+    
+    # is-deeply @result.shift, [
+    #     1,
+    #     'a', 'a', Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ),   # Str types
+    #     -1, 1, 1, 1, 18446744073709551615,                                              # Int types
+    #     1.1, -0.33, 0.33,                                                               # Num/Rat types
+    #     Buf.new( 0x00 ), Buf.new( 0x00 ),  Buf.new( 0x00 ), Buf.new( 0x00 )             # Buf types
+    # ], 'Root table';
+
+};
+
+load( $connection, 'mysql', 'cleanup.sql' );

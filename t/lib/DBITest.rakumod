@@ -41,7 +41,7 @@ sub load ( $connection, $directory, $file ) is export {
 
         # skip comments,
         # block comments are NOT supported
-        next if $line.starts-with( '-- ' );
+        next if $line ~~ / \s* '--' /;
 
         # accumulate statement lines
         $query ~= $line ~ "\n";
