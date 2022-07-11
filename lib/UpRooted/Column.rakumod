@@ -36,22 +36,6 @@ has Str $.name is required;
 
 =begin pod
 
-=head2 type
-
-Hint for L<UpRooted::Writer> how data should be handled.
-For example to save binary data to C<.csv> file Base64 encoding may be used
-or to save binary data to C<.sql> file C<UNHEX()> method can be used.
-
-All database types must be coerced to basic Raku types.
-
-If not given C<Str> is assumed.
-
-=end pod
-
-has Any:U $.type = Str;
-
-=begin pod
-
 =head2 nullable
 
 Tells if value can be C<NULL>.

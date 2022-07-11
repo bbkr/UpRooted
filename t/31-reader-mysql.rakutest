@@ -29,20 +29,14 @@ subtest 'no data' => {
 
 subtest 'with data' => {
 
-    plan 1;
+    plan 2;
 
     load( $connection, 'mysql', 'data.sql' );
 
     my @result = gather $reader.read( id => 1 );
+
     is @result.shift.name, 't1', 'Root table';
-    
-    # is-deeply @result.shift, [
-    #     1,
-    #     'a', 'a', Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ),   # Str types
-    #     -1, 1, 1, 1, 18446744073709551615,                                              # Int types
-    #     1.1, -0.33, 0.33,                                                               # Num/Rat types
-    #     Buf.new( 0x00 ), Buf.new( 0x00 ),  Buf.new( 0x00 ), Buf.new( 0x00 )             # Buf types
-    # ], 'Root table';
+    is-deeply @result.shift, [ 1, 'a' ], 'Record';
 
 };
 

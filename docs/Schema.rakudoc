@@ -35,14 +35,14 @@ Add Tables to Schema:
 Add Columns to Tables:
 
     with $library.table( 'authors' ) -> $table {
-        UpRooted::Column.new( :$table, name => 'id', type => Int, :!nullable );
+        UpRooted::Column.new( :$table, name => 'id', :!nullable );
         UpRooted::Column.new( :$table, name => 'first_name', :nullable );
         UpRooted::Column.new( :$table, name => 'last_name', :!nullable );
     }
 
     with $library.table( 'books' ) -> $table {
-        UpRooted::Column.new( :$table, name => 'id', type => Int, :!nullable );
-        UpRooted::Column.new( :$table, name => 'author_id', type => Int, :!nullable );
+        UpRooted::Column.new( :$table, name => 'id', :!nullable );
+        UpRooted::Column.new( :$table, name => 'author_id', :!nullable );
         UpRooted::Column.new( :$table, name => 'title', :nullable );
     }
 

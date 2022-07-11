@@ -1,24 +1,7 @@
 -- root table
 CREATE TABLE `t1` (
     `id` bigint unsigned not null,
-    `c_01` char( 1 ),
-    `c_02` varchar( 8 ),
-    `c_03` tinytext,
-    `c_04` text,
-    `c_05` mediumtext,
-    `c_06` longtext,
-    `c_07` tinyint,
-    `c_08` smallint,
-    `c_09` mediumint,
-    `c_10` int,
-    `c_11` bigint unsigned,
-    `c_12` decimal( 8, 2 ),
-    `c_13` float( 8, 2 ),
-    `c_14` double( 8, 2 ),
-    `c_15` tinyblob,
-    `c_16` blob,
-    `c_17` mediumblob,
-    `c_18` longblob,
+    `c1` char( 1 ),
     PRIMARY KEY ( `id` )
 ) Engine = InnoDB;
 
