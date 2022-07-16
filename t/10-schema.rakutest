@@ -53,7 +53,7 @@ subtest 'table' => {
 
 subtest 'column' => {
     
-    plan 9;
+    plan 11;
 
     my $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
@@ -63,12 +63,14 @@ subtest 'column' => {
     }, Exception, message => 'Column c1 is not present in Table t1.', 'Column is not present in Table';
 
     lives-ok {
-        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', type => 'tEXt', :!nullable );
     }, 'Column created';
     
     ok $schema.table( 't1' ).column( 'c1' ):defined, 'Column is present in Table';
     
-    is $schema.table( 't1' ).column( 'c1' ).order, 1, 'Automatic Column order set.';
+    is $schema.table( 't1' ).column( 'c1' ).type, 'text', 'Column has known type which was lowercased';
+    
+    is $schema.table( 't1' ).column( 'c1' ).order, 1, 'Automatic Column order set';
     
     throws-like {
         UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
@@ -81,6 +83,9 @@ subtest 'column' => {
     }, Exception, message => 'Column c2 is from different Table than t1.', 'Column is from different Table';
 
     UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c3', :!nullable, order => 3 );
+    
+    nok $schema.table( 't1' ).column( 'c3' ).type.defined, 'Column has not known type';
+    
     UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :!nullable, order => 2 );
     is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'c1', 'c2', 'c3' ), 'All Columns in definition order';
     

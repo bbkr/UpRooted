@@ -9,7 +9,7 @@ use UpRooted::Schema::MySQL;
 my $connection = connect( 'mysql' );
 load( $connection, 'mysql', 'cleanup.sql' );
 
-plan 13;
+plan 14;
 
 my $schema;
 lives-ok { $schema = UpRooted::Schema::MySQL.new( :$connection ) }, 'Schema discovered';
@@ -24,10 +24,13 @@ is-deeply $schema.tables.map( { .name } ), ( 't1', 't2', 't3', 't4', 't5', 't6',
 
 # no need to check every Table
 # TODO: lack of virtual columns test, difficult to perform on older MySQL versions
-is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'id', 'c1' ), 'Columns present';
+is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'id', 'c_01', 'c_02', 'c_03', 'c_04', 'c_05', 'c_06', 'c_07', 'c_08', 'c_09', 'c_10', 'c_11', 'c_12', 'c_13', 'c_14', 'c_15', 'c_16', 'c_17', 'c_18' ), 'Columns present';
+
+# TODO: JSON type, difficult to perform on older MySQL versions
+is-deeply $schema.table( 't1' ).columns.map( { .type } ), ( 'bigint', 'char', 'varchar', 'tinytext', 'text', 'mediumtext', 'longtext', 'tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'decimal', 'float', 'double', 'tinyblob', 'blob', 'mediumblob', 'longblob' ), 'Columns types';
 
 # no need to check every Column, just both cases
-is $schema.table( 't1' ).columns( 'id', 'c1' ).map( { .nullable } ), ( False, True ), 'Columns nullability';
+is $schema.table( 't1' ).columns( 'id', 'c_01' ).map( { .nullable } ), ( False, True ), 'Columns nullability';
 
 # check which Tables are connected with Relations,
 # no need to check all of them, just specific cases

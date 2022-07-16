@@ -67,7 +67,8 @@ method new ( :$connection! ) {
 
     state $select-columns = qq{
         SELECT `column_name` AS `name`, `table_name` AS `table_name`,
-            IF( `is_nullable` = 'YES', TRUE, FALSE ) AS `nullable`, `ordinal_position` AS `order`
+            IF( `is_nullable` = 'YES', TRUE, FALSE ) AS `nullable`,
+            `data_type` AS `type`, `ordinal_position` AS `order`
         FROM `information_schema`.`columns`
         WHERE `table_schema` = DATABASE( )
             AND `table_name` IN ( $select-tables )  -- exclude columns from views
@@ -82,6 +83,7 @@ method new ( :$connection! ) {
             UpRooted::Column.new(
                 :$table,
                 name => %column{ 'name' },
+                type => %column{ 'type' }.lc,
                 nullable => %column{ 'nullable' }.so,   # cast because MySQL does not support true boolean values
                 order => %column{ 'order' }
             );

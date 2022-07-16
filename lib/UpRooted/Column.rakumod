@@ -36,6 +36,24 @@ has Str $.name is required;
 
 =begin pod
 
+=head2 type
+
+Database type acting as hint for L<UpRooted::Writer> how data should be handled.
+
+For example to save binary data to C<.sql> file C<UNHEX()> method can be used.
+Or to save JSON to C<.json> file decoded nested structures may be more convenient
+than saving JSON text in JSON structure.
+
+It is up to specific L<UpRooted::Writer> to figure out the best way to utilize type information.
+
+Type will always be lowercased.
+
+=end pod
+
+has Str $.type;
+
+=begin pod
+
 =head2 nullable
 
 Tells if value can be C<NULL>.
@@ -65,5 +83,7 @@ submethod TWEAK {
     
     # register Column in Table
     $!table.add-column( self );
+    
+    $!type .= lc if defined $!type;
 
 }
