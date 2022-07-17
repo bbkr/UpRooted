@@ -29,21 +29,47 @@ subtest 'no data' => {
 
 subtest 'with data' => {
 
-    plan 1;
+    plan 19;
 
     load( $connection, 'mysql', 'data.sql' );
 
     my @result = gather $reader.read( id => 1 );
-    is @result.shift.name, 't1', 'Root table';
     
-    # is-deeply @result.shift, [
-    #     1,
-    #     'a', 'a', Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ),   # Str types
-    #     -1, 1, 1, 1, 18446744073709551615,                                              # Int types
-    #     1.1, -0.33, 0.33,                                                               # Num/Rat types
-    #     Buf.new( 0x00 ), Buf.new( 0x00 ),  Buf.new( 0x00 ), Buf.new( 0x00 )             # Buf types
-    # ], 'Root table';
+    is @result.shift.name, 't1', 'Root table';
+    is-deeply @result.shift, [
+        1,
+        'a', 'a', Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ),
+        -1, 1, 1, 1, 18446744073709551615,
+        1.1, -0.33e0, 0.33e0,
+        Buf.new( 0x00 ), Buf.new( 0x00 ),  Buf.new( 0x00 ), Buf.new( 0x00 ) 
+    ], 'Root data';
 
+    # also confirms if no data from tree starting at id = 2 leaked
+    is @result.shift.name, 't2', 'Not nullable single column relation table';
+    is-deeply @result.shift, [ 1, 1 ], 'Not nullable single column relation data';
+    is-deeply @result.shift, [ 2, 1 ], 'Not nullable single column relation data';
+        
+    is @result.shift.name, 't6', 'Self loop table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Self loop data';
+    
+    is @result.shift.name, 't9', 'Horse riddle table';
+    # TODO, behavior not decided yet 
+    
+    is @result.shift.name, 't3', 'Not nullable relations of different lengths table.';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Not nullable relations of different lengths data';
+    is-deeply @result.shift, [ 2, 1, 2 ], 'Not nullable relations of different lengths data';
+    
+    is @result.shift.name, 't4', 'Not nullable relations longer than nullable one table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Not nullable relations longer than nullable one data';
+    
+    is @result.shift.name, 't7', 'Long loop table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Long loop data';
+    is @result.shift.name, 't8', 'Long loop table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Long loop data';
+
+    is @result.shift.name, 't5', 'Multi column relation table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Multi column relation data';
+    
 };
 
 load( $connection, 'mysql', 'cleanup.sql' );
