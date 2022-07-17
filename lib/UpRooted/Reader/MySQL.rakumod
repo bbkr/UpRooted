@@ -62,6 +62,7 @@ method !read ( $path, %conditions ) {
     }
     $query-from ~= @query-from-tables.join: ' ';
     
+    # add root Table conditions, the same for all root to leaf chains
     my $query-where = 'WHERE ';
     if %conditions {
         my @query-where-conditions = %conditions.sort.map: {
@@ -73,8 +74,10 @@ method !read ( $path, %conditions ) {
         $query-where ~= 'TRUE';
     }
     
+    # compose final query
     my $query = ( $query-select, $query-from, $query-where ).join( ' ' );
 
+    # execute query and allow to gather results by caller
     my $statement = $!connection.execute( $query );
     while my @row := $statement.row( ) {
         take @row;
