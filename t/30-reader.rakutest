@@ -47,10 +47,10 @@ subtest 'tree paths' => {
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
     UpRooted::Table.new( :$schema, name => 't3' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c4', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c4', :!is-nullable );
     UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't2' ).columns( 'c2' ),

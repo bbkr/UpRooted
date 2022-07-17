@@ -51,10 +51,10 @@ subtest 'path with inconsistent relations' => {
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
     UpRooted::Table.new( :$schema, name => 't3' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c2', :!is-nullable );
     UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't2' ).columns( 'c1' ),
@@ -90,10 +90,10 @@ subtest 'path nullability' => {
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
     UpRooted::Table.new( :$schema, name => 't3' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c2', :nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c2', :is-nullable );
     UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't2' ).columns( 'c1' ),
@@ -106,15 +106,15 @@ subtest 'path nullability' => {
     );
 
     my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
-    ok !$path.nullable, 'Path between root Table that is also leaf Table is never nullable';
+    ok !$path.is-nullable, 'Path between root Table that is also leaf Table is never nullable';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ) );
-    ok !$path.nullable, 'Path has no nullable Relations';
+    ok !$path.is-nullable, 'Path has no nullable Relations';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ), $schema.table( 't2' ).child-relation( 'r2' ),  );
-    ok $path.nullable, 'Path has nullable Relations';
+    ok $path.is-nullable, 'Path has nullable Relations';
 
 };
 
@@ -130,11 +130,11 @@ subtest 'path relations analyze' => {
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
     UpRooted::Table.new( :$schema, name => 't3' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c3', :nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c4', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c5', :nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c3', :is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c4', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c5', :is-nullable );
     my $relation_t1_t2_not_nullable = UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't2' ).columns( 'c2' ),
@@ -210,9 +210,9 @@ subtest 'path order' => {
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
     UpRooted::Table.new( :$schema, name => 't3' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!is-nullable );
     my $relation_t1_t2 = UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't2' ).columns( 'c2' ),
@@ -253,8 +253,8 @@ subtest 'path loops' => {
     my $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :is-nullable );
     my $relation_t1_t1 = UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't1' ).columns( 'c1' ),
@@ -335,9 +335,9 @@ subtest 'tree basics' => {
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
     UpRooted::Table.new( :$schema, name => 't3' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!is-nullable );
     UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't2' ).columns( 'c2' ),
@@ -374,7 +374,7 @@ subtest 'tree loops' => {
 
     my $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
     UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't1' ).columns( 'c1' ),
@@ -388,8 +388,8 @@ subtest 'tree loops' => {
     $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!is-nullable );
     UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't2' ).columns( 'c2' ),
@@ -409,9 +409,9 @@ subtest 'tree loops' => {
     UpRooted::Table.new( :$schema, name => 't1' );
     UpRooted::Table.new( :$schema, name => 't2' );
     UpRooted::Table.new( :$schema, name => 't3' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c3', :!is-nullable );
     UpRooted::Relation.new(
         parent-columns => $schema.table( 't1' ).columns( 'c1' ),
         child-columns => $schema.table( 't2' ).columns( 'c2' ),

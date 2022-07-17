@@ -30,7 +30,7 @@ is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'id', 'c_01', 'c_02'
 is-deeply $schema.table( 't1' ).columns.map( { .type } ), ( 'bigint', 'char', 'varchar', 'tinytext', 'text', 'mediumtext', 'longtext', 'tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'decimal', 'float', 'double', 'tinyblob', 'blob', 'mediumblob', 'longblob' ), 'Columns types';
 
 # no need to check every Column, just both cases
-is $schema.table( 't1' ).columns( 'id', 'c_01' ).map( { .nullable } ), ( False, True ), 'Columns nullability';
+is $schema.table( 't1' ).columns( 'id', 'c_01' ).map( { .is-nullable } ), ( False, True ), 'Columns nullability';
 
 # check which Tables are connected with Relations,
 # no need to check all of them, just specific cases

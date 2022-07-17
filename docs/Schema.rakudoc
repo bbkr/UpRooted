@@ -35,15 +35,15 @@ Add Tables to Schema:
 Add Columns to Tables:
 
     with $library.table( 'authors' ) -> $table {
-        UpRooted::Column.new( :$table, name => 'id', type => 'bigint', :!nullable );
-        UpRooted::Column.new( :$table, name => 'first_name', :nullable );
-        UpRooted::Column.new( :$table, name => 'last_name', :!nullable );
+        UpRooted::Column.new( :$table, name => 'id', type => 'bigint', :!is-nullable );
+        UpRooted::Column.new( :$table, name => 'first_name', :is-nullable );
+        UpRooted::Column.new( :$table, name => 'last_name', :!is-nullable );
     }
 
     with $library.table( 'books' ) -> $table {
-        UpRooted::Column.new( :$table, name => 'id', type => 'bigint', :!nullable );
-        UpRooted::Column.new( :$table, name => 'author_id', type => 'bigint', :!nullable );
-        UpRooted::Column.new( :$table, name => 'title', :nullable );
+        UpRooted::Column.new( :$table, name => 'id', type => 'bigint', :!is-nullable );
+        UpRooted::Column.new( :$table, name => 'author_id', type => 'bigint', :!is-nullable );
+        UpRooted::Column.new( :$table, name => 'title', :is-nullable );
     }
 
 Connect Tables with Relations:

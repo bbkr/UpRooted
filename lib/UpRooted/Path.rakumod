@@ -172,16 +172,16 @@ method relations ( ) {
 
 =begin pod
 
-=head2 nullable
+=head2 is-nullable
 
 Path is nullable if any L<UpRooted::Relation> in it is nullable.
 Can be called only after any L<UpRooted::Relation>s chain is established.
 
 =end pod
 
-method nullable ( ) {
+method is-nullable ( ) {
     
-    return so self.relations.first: *.nullable;
+    return so self.relations.first: *.is-nullable;
 }
 
 =begin pod
@@ -233,9 +233,9 @@ method analyze-relations ( *@relations where { .elems } ) {
         @!relations = @relations;
         
     }
-    elsif self.nullable {
+    elsif self.is-nullable {
         
-        if so @relations.first: *.nullable {
+        if so @relations.first: *.is-nullable {
         
             # TODO check for horse riddle
             
@@ -255,7 +255,7 @@ method analyze-relations ( *@relations where { .elems } ) {
     }
     else {
     
-        if so @relations.first: *.nullable {
+        if so @relations.first: *.is-nullable {
         
             # do nothing,
             # nullable Relations chain is worse than not nullable one, regardless of length

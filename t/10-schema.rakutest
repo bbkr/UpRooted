@@ -63,7 +63,7 @@ subtest 'column' => {
     }, Exception, message => 'Column c1 is not present in Table t1.', 'Column is not present in Table';
 
     lives-ok {
-        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', type => 'tEXt', :!nullable );
+        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', type => 'tEXt', :!is-nullable );
     }, 'Column created';
     
     ok $schema.table( 't1' ).column( 'c1' ):defined, 'Column is present in Table';
@@ -73,26 +73,26 @@ subtest 'column' => {
     is $schema.table( 't1' ).column( 'c1' ).order, 1, 'Automatic Column order set';
     
     throws-like {
-        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
+        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
     }, Exception, message => 'Column c1 ia already present in Table t1.', 'Column is already present in Table';
 
     throws-like {
         $schema.table( 't1' ).add-column(
-            UpRooted::Column.new( table => UpRooted::Table.new( :$schema, name => 't2' ), name => 'c2', :nullable )
+            UpRooted::Column.new( table => UpRooted::Table.new( :$schema, name => 't2' ), name => 'c2', :is-nullable )
         );
     }, Exception, message => 'Column c2 is from different Table than t1.', 'Column is from different Table';
 
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c3', :!nullable, order => 3 );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c3', :!is-nullable, order => 3 );
     
     nok $schema.table( 't1' ).column( 'c3' ).type.defined, 'Column has not known type';
     
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :!nullable, order => 2 );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :!is-nullable, order => 2 );
     is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'c1', 'c2', 'c3' ), 'All Columns in definition order';
     
     is-deeply $schema.table( 't1' ).columns( 'c3', 'c1' ).map( { .name } ), ( 'c3', 'c1' ), 'Subset of Columns in requested order';
 
     throws-like {
-        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c4', :!nullable, order => 1 );
+        UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c4', :!is-nullable, order => 1 );
     }, Exception, message => 'Column c4 has order conflict in Table t1.', 'Column has order conflict in Table';
 
 }
@@ -103,11 +103,11 @@ subtest 'relation' => {
 
     my $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :!nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :!is-nullable );
     UpRooted::Table.new( :$schema, name => 't2' );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c3', :!nullable );
-    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c4', :nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c3', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c4', :is-nullable );
 
     throws-like {
         $schema.table( 't1' ).child-relation( 'r1' );
@@ -126,7 +126,7 @@ subtest 'relation' => {
     with $schema.table( 't1' ).child-relation( 'r1' ) {
         is .parent-table, $schema.table( 't1' ), 'Relation knows parent Table from Columns.';
         is .child-table, $schema.table( 't2' ), 'Relation knows child Table from Columns.';
-        nok .nullable, 'Relation is not nullable.';
+        nok .is-nullable, 'Relation is not nullable.';
     }
     
     throws-like {
@@ -145,7 +145,7 @@ subtest 'relation' => {
         );
     }, 'Relation on multiple columns created';
     
-    ok $schema.table( 't1' ).child-relation( 'r2' ).nullable, 'Relation is nullable.';
+    ok $schema.table( 't1' ).child-relation( 'r2' ).is-nullable, 'Relation is nullable.';
     
     is-deeply $schema.table( 't1' ).children-relations.map( { .name } ), ( 'r1', 'r2' ), 'All Relations to child Tables in name order';
     

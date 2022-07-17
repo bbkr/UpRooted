@@ -12,7 +12,7 @@ Represents Column level of relational database.
 
 =head1 SYNOPSIS
 
-    UpRooted::Column.new( table => $books, name => 'title', type => Str, :!nullable, order => 2 );
+    UpRooted::Column.new( table => $books, name => 'title', type => Str, :!is-nullable, order => 2 );
 
 =head1 ATTRIBUTES
 
@@ -54,7 +54,7 @@ has Str $.type;
 
 =begin pod
 
-=head2 nullable
+=head2 is-nullable
 
 Tells if value can be C<NULL>.
 
@@ -62,7 +62,7 @@ Tech note: This information is very important for proper data extraction!
 
 =end pod
 
-has Bool $.nullable is required;
+has Bool $.is-nullable is required;
 
 =begin pod
 

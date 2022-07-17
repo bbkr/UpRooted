@@ -67,7 +67,7 @@ method new ( :$connection! ) {
 
     state $select-columns = qq{
         SELECT `column_name` AS `name`, `table_name` AS `table_name`,
-            IF( `is_nullable` = 'YES', TRUE, FALSE ) AS `nullable`,
+            IF( `is_nullable` = 'YES', TRUE, FALSE ) AS `is_nullable`,
             `data_type` AS `type`, `ordinal_position` AS `order`
         FROM `information_schema`.`columns`
         WHERE `table_schema` = DATABASE( )
@@ -84,7 +84,7 @@ method new ( :$connection! ) {
                 :$table,
                 name => %column{ 'name' },
                 type => %column{ 'type' }.lc,
-                nullable => %column{ 'nullable' }.so,   # cast because MySQL does not support true boolean values
+                is-nullable => %column{ 'is_nullable' }.so,   # cast because MySQL does not support true boolean values
                 order => %column{ 'order' }
             );
         }

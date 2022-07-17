@@ -112,7 +112,7 @@ method child-columns ( ) {
 
 =begin pod
 
-=head2 nullable
+=head2 is-nullable
 
 L<UpRooted::Relation> is nullable if any L<UpRooted::Column>
 from child L<UpRooted::Table> used in this L<UpRooted::Relation> is nullable.
@@ -123,7 +123,7 @@ by following this Relation from all rows in parent Table.
 
 =end pod
 
-method nullable ( ) {
+method is-nullable ( ) {
 
-    return [or]( @!child-columns>>.nullable )
+    return [or]( @!child-columns>>.is-nullable )
 }
