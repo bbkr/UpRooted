@@ -47,7 +47,13 @@ Rows are in form of Array of values in the same order as L<UpRooted::Column>s in
 Accepts conditions for root L<UpRooted::Table>.
 Conditions must have defined values and C<=> operator will be used to evaluate them.
 
-This list can be C<gather>ed by L<UpRooted::Writer>.
+This sequence can be C<gather>ed by L<UpRooted::Writer>.
+
+Specific L<UpRooted::Reader> must implement following private methods:
+
+Method C<read-path( UpRooted::Path, %conditions )>.
+Instruction how to reach data in leaf L<UpRooted::Table>
+starting at rown in root L<UpRooted::Table> described by conditions.
 
 =end pod
 
@@ -63,7 +69,7 @@ method read ( *%conditions ) {
         take $path.leaf-table;
         
         # pass Path to specific implementation, it should take each row
-        self!read( $path, %conditions );
+        self!read-path( $path, %conditions );
     }
 
 }

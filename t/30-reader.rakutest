@@ -6,7 +6,6 @@ use UpRooted::Schema;
 use UpRooted::Table;
 use UpRooted::Column;
 use UpRooted::Relation;
-use UpRooted::Path;
 use UpRooted::Tree;
 use UpRooted::Reader;
 
@@ -15,7 +14,7 @@ plan 2;
 class UpRooted::Reader::Dummy does UpRooted::Reader {
 
     # emulate returning dummy rows from each leaf Table
-    method !read ( $path, %conditions ) {
+    method !read-path ( $path, %conditions ) {
         
         my $table = $path.leaf-table;
         

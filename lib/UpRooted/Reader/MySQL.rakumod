@@ -40,7 +40,7 @@ It must be kept open during every L<read( )> call.
 
 has $.connection is required;
 
-method !read ( $path, %conditions ) {
+method !read-path ( $path, %conditions ) {
     
     # get list of columns from leaf Table
     my $query-select = 'SELECT ';
