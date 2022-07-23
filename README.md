@@ -44,7 +44,7 @@ Actual data is obtained by `Reader` and stored by `Writer`.
     use UpRooted::Writer::CSV;
 
     my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
-    my $writer = UpRooted::Writer::CSV.new( :!schema-prefix );
+    my $writer = UpRooted::Writer::CSV.new( :!use-schema-name );
     
     $writer.write( :$reader, id => 1 );
 ```
