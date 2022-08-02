@@ -19,8 +19,6 @@ This module is NOT continuous replication tool (like for example Debezium).
 
 ## SYNOPSIS
 
-First you need to discover database `Schema`:
-
 ```raku
     use UpRooted::Schema::MySQL;
 
@@ -69,7 +67,14 @@ Keep reading to find out which variants of each module are available, and maybe 
 It can be discovered automatically by plugins like:
 * `UpRooted::Schema::MySQL`
 
-In rare cases you may need to construct or fine tune `UpRooted::Schema` manually. For example if you use MySQL MyISAM engine or MySQL partitioning. Without foreign keys relations between `UpRooted::Table`s cannot be discovered and must be defined manually. There is (separate manual)[docs/Schema.md] describing this process.
+In rare cases you may need to construct or fine tune `UpRooted::Schema` manually. For example if you use MySQL MyISAM engine or MySQL partitioning. Without foreign keys relations between `UpRooted::Table`s cannot be discovered and must be defined manually. There is [separate manual](docs/Schema.md) describing this process.
+
+Creating `UpRooted::Schema` must be done only once per database.
+It is expensive so cache and reuse it whenever you can.
+
+### UpRooted::Tree
+
+
 
 ## CONTACT
 
