@@ -60,8 +60,16 @@ Your user from `users` `Table` with `id = 1` along with all his data from child 
 
 Keep reading to find out which variants of each module are available, and maybe even how to implement your own.
 
+## ENTITIES
 
-## METHODS
+### UpRooted::Schema
+
+`Uprooted::Schema` describes relation between `Uprooted::Tables`.
+
+It can be discovered automatically by plugins like:
+* `UpRooted::Schema::MySQL`
+
+In rare cases you may need to construct or fine tune `UpRooted::Schema` manually. For example if you use MySQL MyISAM engine or MySQL partitioning. Without foreign keys relations between `UpRooted::Table`s cannot be discovered and must be defined manually. There is (separate manual)[docs/Schema.md] describing this process.
 
 ## CONTACT
 
