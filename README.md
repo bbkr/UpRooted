@@ -19,50 +19,35 @@ This module is NOT continuous replication tool (like for example Debezium).
 
 ## SYNOPSIS
 
-```raku
-    use UpRooted::Schema::MySQL;
-
-    my $connection = DBIish.connect( 'mysql', host => ..., port => ..., ... );
-    my $schema = UpRooted::Schema::MySQL.new( :$connection );
-```
-
-Then `Tree` must be constructed to determine how to reach data in leaf Tables from given root Table:
+Let's say you have MySQL database and want to save user of `id = 1` from `users` table with all his data from other tables to `.sql` file. 
 
 ```raku
-    use UpRooted::Tree;
+my $connection = DBIish.connect( 'mysql', host => ..., port => ..., ... );
 
-    my $tree = UpRooted::Tree.new( root-table => $schema.table( 'users' ) );
-```
-( both `Schema` and `Tree` creation are expensive, you can cache and reuse them )
+use UpRooted::Schema::MySQL;
+my $schema = UpRooted::Schema::MySQL.new( :$connection );
 
-Actual data is obtained by `Reader` and stored by `Writer`.
+use UpRooted::Tree;
+my $tree = UpRooted::Tree.new( root-table => $schema.table( 'users' ) );
 
-```raku
-    use UpRooted::Reader::MySQL;
-    use UpRooted::Writer::CSV;
+use UpRooted::Reader::MySQL;
+my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
 
-    my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
-    my $writer = UpRooted::Writer::CSV.new( :!use-schema-name );
+use UpRooted::Writer::MySQLFile;
+my $writer = UpRooted::Writer::MySQLFile.new( :!use-schema-name );
     
-    $writer.write( :$reader, id => 1 );
+$writer.write( :$reader, id => 1 );
 ```
 
-Your user from `users` `Table` with `id = 1` along with all his data from child `Tables` will be stored as set of CSV files:
+Your user will be saved as `out.sql` file.
 
-```
-0001-users.csv
-0002-orders.csv
-0003-payments.csv
-...
-```
+## MODULES
 
-Keep reading to find out which variants of each module are available, and maybe even how to implement your own.
-
-## ENTITIES
+This section explains role of every module in `UpRooted` stack and tells which variants of each module are available.
 
 ### UpRooted::Schema
 
-`Uprooted::Schema` describes relation between `Uprooted::Tables`.
+`UpRooted::Schema` describes relation between `UpRooted::Tables`.
 
 It can be discovered automatically by plugins like:
 * `UpRooted::Schema::MySQL`
@@ -70,11 +55,48 @@ It can be discovered automatically by plugins like:
 In rare cases you may need to construct or fine tune `UpRooted::Schema` manually. For example if you use MySQL MyISAM engine or MySQL partitioning. Without foreign keys relations between `UpRooted::Table`s cannot be discovered and must be defined manually. There is [separate manual](docs/Schema.md) describing this process.
 
 Creating `UpRooted::Schema` must be done only once per database.
-It is expensive so cache and reuse it whenever you can.
 
 ### UpRooted::Tree
 
+`UpRooted::Tree` knows how to reach each leaf `UpRooted::Table` from chosen root `UpRooted::Table`.
+It also resolves `UpRooted::Table`s order correctly to satisfy foreign key constraints, which is important for example when writing data tree to online database.
 
+You can derive many `UpRooted::Tree`s from single `UpRooted::Schema`, depending on which root `UpRooted::Table` is used.
+
+Creating `UpRooted::Tree` must be done only once per root `UpRooted::Table`.
+
+### UpRooted::Reader
+
+`UpRooted::Reader` transforms `UpRooted::Tree` to series of queries allowing to extract data that belong to given row in root `UpRooted::Table`. This is always database specific.
+
+Available variants:
+* `UpRooted::Reader::MySQL`
+
+Creating `UpRooted::Reader` must be done only once per `Uprooted::Tree`.
+
+## CACHING
+
+Creating instances of modules mentioned above are hevay operations, especially on large schemas. You can reuse all of them for great speed improvement.
+
+For example if you need to save multiple users you need to create `UpRooted::Schema`, `UpRooted::Tree`, `UpRooted::Reader` and `UpRooted::Writer` only once.
+
+```raku
+my $schema = ...;
+my $tree = ...;
+my $reader = ...;
+my $writer = UpRooted::Writer::MySQLFile.new(
+    # name generator to avoid file name conflicts
+    name => sub ( %conditions ) {
+        %conditions{ 'id' } ~ '.sql'
+    }
+);
+    
+$writer.write( :$reader, id => 1 );
+$writer.write( :$reader, id => 2 );
+$writer.write( :$reader, id => 3 );
+```
+
+It will create `1.sql`, `2.sql`, `3.sql` files without rediscovering everything every time.
 
 ## CONTACT
 

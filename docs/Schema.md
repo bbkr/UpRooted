@@ -29,7 +29,7 @@ UpRooted::Table.new( :$schema, name => 'authors' );
 UpRooted::Table.new( :$schema, name => 'books' );
 ```
 
-Add `UpRooted::Columns` to `UpRooted::Tables`:
+Add `UpRooted::Column`s to `UpRooted::Table`s:
 
 ```raku
 with $library.table( 'authors' ) -> $table {
@@ -49,7 +49,7 @@ Note that for `UpRooted::Column`:
 * Nullability is super important for proper `UpRooted::Tree` construction later.
 * You may provide original database type to help `Uprooted::Writer` make decision how to store data.
 
-Connect `UpRooted::Tables` with `UpRooted::Relations`:
+Connect `UpRooted::Table`s with `UpRooted::Relation`s:
 
 ```raku
 UpRooted::Relation.new(
@@ -95,18 +95,3 @@ Arity must be the same.
 
 Just define two `UpRooted::Schema`s with `UpRooted::Table`s and `Uprooted::Column`s in them.
 Then connect `Uprooted::Table`s from different `UpRooted::Schema`s using `UpRooted::Relation`s.
-
-=head2 Differences between Schema and Tree
-
-Schema represents entities in your database and relations between them.
-
-Tree is subset of Schema with one Table being root.
-You can derive many Trees from single Schema, depending which root Table is used.
-
-Tree knows how and in which order reach data in all child Tables.
-
-=head2 Caching
-
-Once Schema is composed it can be reused for deriving multiple Trees.
-Once Tree is derived it can be reused for reading data
-for different Columns conditions in root Table.
