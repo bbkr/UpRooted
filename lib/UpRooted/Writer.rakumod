@@ -30,7 +30,7 @@ Default is C<True>.
 
 =end pod
 
-has $.use-schema-prefix = True;
+has $.use-schema-name = True;
 
 =begin pod
 
@@ -39,11 +39,11 @@ has $.use-schema-prefix = True;
 =head2 write
 
 Passes through conditions to L<UpRooted::Reader>
-and pases back results to specific L<UpRooted::Writer> implementation.
+and forwards results to specific L<UpRooted::Writer> implementation.
 
 Specific L<UpRooted::Writer> must implement following private methods:
 
-Method C<write-initialize( UpRooted::Tree, %conditions )> is called first.
+Method C<write-start( UpRooted::Tree, %conditions )> is called first.
 Allows to prepare general environment for writing,
 for example creating directory "user-id=1" for future files.
 For context L<UpRooted::Tree> and read conditions are passed.

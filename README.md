@@ -106,7 +106,7 @@ my $tree = ...;
 my $reader = ...;
 my $writer = UpRooted::Writer::MySQLFile.new(
     # name generator to avoid file name conflicts
-    name => sub ( %conditions ) {
+    file-nameing => sub ( $tree, %conditions ) {
         %conditions{ 'id' } ~ '.sql'
     }
 );
