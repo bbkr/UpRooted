@@ -78,9 +78,9 @@ Creating `UpRooted::Reader` must be done only once per `Uprooted::Tree`.
 `UpRooted::Writer` writes data provided by `UpRooted::Reader`.
 
 Available variants:
-* `UpRooted::Writer::MySQLHandle` - Write directly to another MySQL database.
+* `UpRooted::Writer::MySQL` - Write directly to another MySQL database.
 * `UpRooted::Writer::MySQLFile` - Write to `.sql` file compatible with MySQL.
-* `UpRooted::Writer::PostgreSQLHandle` (work in progress) - Write directly to another PostgreSQL database.
+* `UpRooted::Writer::PostgreSQL` (work in progress) - Write directly to another PostgreSQL database.
 * `UpRooted::Writer::PostgreSQLFile` (work in progress) - Write to `.sql` file compatible with PostgreSQL.
 * `UpRooted::Writer::JSONFiles` (work in progress) - Write to JSON files where each file is named after table and each line is single row from this table.
 * `UpRooted::Writer::CSVFiles` (work in progress) - Write to CSV files where each file is named after table and each line except header is single row from this table.
