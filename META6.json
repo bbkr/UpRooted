@@ -6,7 +6,7 @@
     "authors": [
         "Paweł bbkr Pabian"
     ],
-    "auth": "github:bbkr",
+    "auth": "zef:bbkr",
     "provides": {
         "UpRooted::Schema": "lib/UpRooted/Schema.rakumod",
         "UpRooted::Schema::MySQL": "lib/UpRooted/Schema/MySQL.rakumod",
