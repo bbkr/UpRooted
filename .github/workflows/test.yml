@@ -6,7 +6,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Get Raku image
-        uses: JJ/raku-test-action@main
-      - run: cat /etc/alpine-release
+      - name: Install Dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install rakudo
+      - name: Run Tests
+        run: raku -v
             
