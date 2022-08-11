@@ -1,6 +1,6 @@
 # Extract subtrees of data from relational databases.
 
-[![Build Status](https://travis-ci.org/bbkr/UpRooted.svg?branch=master)](https://travis-ci.org/bbkr/UpRooted)
+![Status](https://github.com/bbkr/UpRooted/actions/workflows/test.yml/badge.svg)
 
 ## DESCRIPTION
 

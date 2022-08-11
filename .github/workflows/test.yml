@@ -8,8 +8,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Dependencies
-        run: sudo apt-get update && sudo apt-get install libmysqlclient21 libmysqlclient-dev
       - name: Get Raku image
         uses: JJ/raku-test-action@main
+        run: apk update && apk add --no-cache mysql-client mariadb-connector-c-dev
             
