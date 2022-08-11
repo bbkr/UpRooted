@@ -27,14 +27,12 @@ jobs:
           /usr/lib/perl6/site/bin/zef install --/test DBIish App::Prove6
       - name: Run tests
         env:
-          UPROOTED_MYSQL_HOST: mysql
-          UPROOTED_MYSQL_PORT: 
+          UPROOTED_MYSQL_HOST: 127.0.0.1
+          UPROOTED_MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
           UPROOTED_MYSQL_USER: test
           UPROOTED_MYSQL_PASSWORD: test
           UPROOTED_MYSQL_DATABASE: test
         run: |
-          mysql --host=localhost --user=test --password=test --port=${{ job.services.mysql.ports[3306] }} --execute='select true' test
-          mysql --host=mysql --user=test --password=test --execute='select true' test
           /home/runner/.raku/bin/prove6
           raku t/11-schema-mysql.rakutest
             
