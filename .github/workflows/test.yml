@@ -9,7 +9,8 @@ jobs:
       - name: Install Dependencies
         run: |
             sudo apt-get update
-            sudo apt-get install rakudo
+            sudo apt-get install rakudo perl6-zef
+            zef install --/test DBIish
       - name: Run Tests
         run: raku -v
             
