@@ -9,8 +9,10 @@ jobs:
       - name: Install Dependencies
         run: |
             sudo apt-get update
-            sudo apt-get install rakudo perl6-zef
-            zef install --/test DBIish
+            sudo apt-get install rakudo
+            git clone https://github.com/ugexe/zef.git
+            cd zef
+            raku -I. bin/zef install .
       - name: Run Tests
         run: raku -v
             
