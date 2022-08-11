@@ -1,8 +1,8 @@
 {
     "perl": "6.d",
     "name": "UpRooted",
-    "version": "1.0.0",
-    "description": "Extract subtrees of data from relational databases.",
+    "version": "1.0.1",
+    "description": "Extract trees of data from relational databases.",
     "authors": [
         "Paweł bbkr Pabian"
     ],
@@ -21,6 +21,9 @@
         "UpRooted::Writer::MySQLFile": "lib/UpRooted/Writer/MySQLFile.rakumod",
         "UpRooted::Writer::Helper::File": "lib/UpRooted/Writer/Helper/File.rakumod"
     },
+    "depends": [
+        "DBIish"
+    ],
     "license": "Artistic-2.0",
     "source-url": "git://github.com/bbkr/UpRooted.git"
 }
