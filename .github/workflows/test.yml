@@ -7,7 +7,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Dependencies
-        run: sudo apt-get update && sudo apt-get install raku raku-zef
-        run: raku -v
-        run: zef install --/test DBIish
+        run: |
+          sudo apt-get update && sudo apt-get install raku raku-zef
+          raku -v
+          zef install --/test DBIish
             
