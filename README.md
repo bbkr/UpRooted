@@ -68,6 +68,7 @@ Creating `UpRooted::Tree` must be done only once per root `UpRooted::Table`.
 `UpRooted::Reader` transforms `UpRooted::Tree` to series of queries allowing to extract data that belong to given row in root `UpRooted::Table`. This is always database specific.
 
 Available variants:
+
 * `UpRooted::Reader::MySQL`
 * `UpRooted::Reader::PostgreSQL` (work in progress)
 
@@ -78,6 +79,7 @@ Creating `UpRooted::Reader` must be done only once per `Uprooted::Tree`.
 `UpRooted::Writer` writes data provided by `UpRooted::Reader`.
 
 Available variants:
+
 * `UpRooted::Writer::MySQL` - Write directly to another MySQL database.
 * `UpRooted::Writer::MySQLFile` - Write to `.sql` file compatible with MySQL.
 * `UpRooted::Writer::PostgreSQL` (work in progress) - Write directly to another PostgreSQL database.
