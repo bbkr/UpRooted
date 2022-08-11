@@ -36,5 +36,5 @@ jobs:
           UPROOTED_MYSQL_USER: test
           UPROOTED_MYSQL_PASSWORD: test
           UPROOTED_MYSQL_DATABASE: test
-        run: prove6
+        run: /home/runner/.raku/bin/prove6
             
