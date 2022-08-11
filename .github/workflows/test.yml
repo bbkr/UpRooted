@@ -12,8 +12,11 @@ jobs:
             sudo apt-get install rakudo
             git clone https://github.com/ugexe/zef.git
             cd zef
-            raku -I. bin/zef install .
+            sudo raku -I. bin/zef install .
             zef install --/test DBIish
       - name: Run Tests
-        run: raku -v
+        run: |
+          raku -v
+          ls
+          pwd
             
