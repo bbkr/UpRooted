@@ -34,5 +34,4 @@ jobs:
           UPROOTED_MYSQL_DATABASE: test
         run: |
           /home/runner/.raku/bin/prove6
-          raku t/11-schema-mysql.rakutest
             
