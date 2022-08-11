@@ -6,9 +6,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install raku raku-zef
-          raku -v
-          zef install --/test DBIish
+      - name: Get Raku image
+        uses: JJ/raku-test-action@main
+      - run: cat /etc/alpine-release
             
