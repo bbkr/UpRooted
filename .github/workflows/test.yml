@@ -3,6 +3,8 @@ on: [ push, pull_request ]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DBIISH_MYSQL_LIB: /usr/lib/x86_64-linux-gnu/libmysqlclient.so.21
     steps:
       - name: Checkout
         uses: actions/checkout@v2
