@@ -11,8 +11,8 @@ jobs:
           MYSQL_USER: test
           MYSQL_PASSWORD: test
           MYSQL_RANDOM_ROOT_PASSWORD: yes
-          ports:
-            - 3306:3306
+        ports:
+          - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -23,18 +23,18 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Dependencies
         run: |
-            sudo apt-get update
-            sudo apt-get install rakudo
-            git clone https://github.com/ugexe/zef.git
-            cd zef
-            sudo raku -I. bin/zef install .
-            /usr/lib/perl6/site/bin/zef install --/test DBIish
+          sudo apt-get update
+          sudo apt-get install rakudo
+          git clone https://github.com/ugexe/zef.git
+          cd zef
+          sudo raku -I. bin/zef install .
+          /usr/lib/perl6/site/bin/zef install --/test DBIish
       - name: Run Tests
         env:
-            UPROOTED_MYSQL_HOST: mysql
-            UPROOTED_MYSQL_PORT: 3306
-            UPROOTED_MYSQL_USER: test
-            UPROOTED_MYSQL_PASSWORD: test
-            UPROOTED_MYSQL_DATABASE: test
+          UPROOTED_MYSQL_HOST: mysql
+          UPROOTED_MYSQL_PORT: 3306
+          UPROOTED_MYSQL_USER: test
+          UPROOTED_MYSQL_PASSWORD: test
+          UPROOTED_MYSQL_DATABASE: test
         run: prove6
             
