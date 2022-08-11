@@ -3,12 +3,11 @@ on: [ push, pull_request ]
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      DBIISH_MYSQL_LIB: /usr/lib/x86_64-linux-gnu/libmysqlclient.so.21
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Get Raku image
-        uses: JJ/raku-test-action@main
-        run: apk update && apk add --no-cache mysql-client mariadb-connector-c-dev
+      - name: Dependencies
+        run: sudo apt-get update && sudo apt-get install raku raku-zef
+        run: raku -v
+        run: zef install --/test DBIish
             
