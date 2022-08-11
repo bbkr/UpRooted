@@ -13,7 +13,7 @@ jobs:
           MYSQL_RANDOM_ROOT_PASSWORD: yes
         ports:
           - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping" --health-interval=4s --health-timeout=2s --health-retries=8
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -33,6 +33,7 @@ jobs:
           UPROOTED_MYSQL_PASSWORD: test
           UPROOTED_MYSQL_DATABASE: test
         run: |
+          mysql --host=localhost --user=test --password=test --execute='select true' test
           mysql --host=mysql --user=test --password=test --execute='select true' test
           /home/runner/.raku/bin/prove6
           raku t/11-schema-mysql.rakutest
