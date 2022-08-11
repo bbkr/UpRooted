@@ -13,7 +13,7 @@ jobs:
             git clone https://github.com/ugexe/zef.git
             cd zef
             sudo raku -I. bin/zef install .
-            zef install --/test DBIish
+            /usr/lib/perl6/site/bin/zef install --/test DBIish
       - name: Run Tests
         run: |
           raku -v
