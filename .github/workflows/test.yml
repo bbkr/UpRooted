@@ -28,7 +28,7 @@ jobs:
           git clone https://github.com/ugexe/zef.git
           cd zef
           sudo raku -I. bin/zef install .
-          /usr/lib/perl6/site/bin/zef install --/test DBIish
+          /usr/lib/perl6/site/bin/zef install --/test DBIish App::Prove6
       - name: Run Tests
         env:
           UPROOTED_MYSQL_HOST: mysql
