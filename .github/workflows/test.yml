@@ -3,6 +3,21 @@ on: [ push, pull_request ]
 jobs:
   test:
     runs-on: ubuntu-22.04
+    services:
+      mysql:
+        image: percona:5.7
+          env:
+            MYSQL_DATABASE: test
+            MYSQL_USER: test
+            MYSQL_PASSWORD: test
+            MYSQL_RANDOM_ROOT_PASSWORD: yes
+            ports:
+              - 3306:3306
+          options: >-
+            --health-cmd="mysqladmin ping"
+            --health-interval=10s
+            --health-timeout=5s
+            --health-retries=3
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -15,8 +30,11 @@ jobs:
             sudo raku -I. bin/zef install .
             /usr/lib/perl6/site/bin/zef install --/test DBIish
       - name: Run Tests
-        run: |
-          raku -v
-          ls
-          pwd
+        env:
+            UPROOTED_MYSQL_HOST: mysql
+            UPROOTED_MYSQL_PORT: 3306
+            UPROOTED_MYSQL_USER: test
+            UPROOTED_MYSQL_PASSWORD: test
+            UPROOTED_MYSQL_DATABASE: test
+        run: prove6
             
