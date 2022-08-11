@@ -28,13 +28,11 @@ jobs:
       - name: Run tests
         env:
           UPROOTED_MYSQL_HOST: mysql
-          UPROOTED_MYSQL_PORT: 3306
+          UPROOTED_MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
           UPROOTED_MYSQL_USER: test
           UPROOTED_MYSQL_PASSWORD: test
           UPROOTED_MYSQL_DATABASE: test
         run: |
-          mysql --host=localhost --user=test --password=test --execute='select true' test
-          mysql --host=mysql --user=test --password=test --execute='select true' test
           /home/runner/.raku/bin/prove6
           raku t/11-schema-mysql.rakutest
             
