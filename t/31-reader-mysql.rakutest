@@ -38,7 +38,7 @@ subtest 'with data' => {
     is @result.shift.name, 't1', 'Root table';
     is-deeply @result.shift, [
         1,
-        'a', 'a', Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ),
+        'a', '😀😔', Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0xF0, 0x9F, 0x98, 0x80, 0xF0, 0x9F, 0x98, 0x94 ),
         -1, 1, 1, 1, 18446744073709551615,
         1.1, -0.33e0, 0.33e0,
         Buf.new( 0x00 ), Buf.new( 0x00 ),  Buf.new( 0x00 ), Buf.new( 0x00 ) 

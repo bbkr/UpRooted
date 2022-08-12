@@ -17,9 +17,9 @@ Writes data from L<UpRooted::Reader> as C<.sql> file compatible with MySQL datab
 
 =head1 SYNOPSIS
 
-    use UpRooted::Writer::MySQL;
+    use UpRooted::Writer::MySQLFile;
     
-    my $writer = UpRooted::Writer::MySQL.new(
+    my $writer = UpRooted::Writer::MySQLFile.new(
         file-naming => sub ( $tree, %conditions ) {
             %conditions{ 'id' } ~ '.sql'
         }

@@ -20,7 +20,7 @@ CREATE TABLE `t1` (
     `c_17` mediumblob,
     `c_18` longblob,
     PRIMARY KEY ( `id` )
-) Engine = InnoDB;
+) Engine = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- not nullable single column relation
 CREATE TABLE `t2` (

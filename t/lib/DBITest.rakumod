@@ -28,6 +28,8 @@ sub connect ( $driver ) is export {
     };
     plan skip-all => 'Connection not established.' if $!;
 
+    $connection.execute( 'SET NAMES utf8mb4' );
+
     return $connection;
 }
 
