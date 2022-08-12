@@ -1,4 +1,4 @@
-# Extract subtrees of data from relational databases.
+# Extract subtrees of data from relational databases in [Raku](https://www.raku.org) language.
 
 ![Status](https://github.com/bbkr/UpRooted/actions/workflows/test.yml/badge.svg)
 
