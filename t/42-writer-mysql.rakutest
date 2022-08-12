@@ -1,0 +1,94 @@
+use lib 'lib';
+use lib 't/lib';
+
+use Test;
+
+use DBITest;
+use UpRooted::Schema;
+use UpRooted::Table;
+use UpRooted::Column;
+use UpRooted::Relation;
+use UpRooted::Tree;
+use UpRooted::Reader;
+use UpRooted::Writer::MySQL;
+
+my $connection = connect( 'mysql' );
+load( $connection, 'mysql', 'cleanup.sql' );
+load( $connection, 'mysql', 'schema.sql' );
+
+plan 3;
+
+my $complex-row;
+class UpRooted::Reader::Dummy does UpRooted::Reader {
+
+    method !read-path ( $path, %conditions ) {
+        
+        given $path.leaf-table.name {
+            when 't1' {
+                # https://github.com/raku-community-modules/DBIish/issues/233
+                # max bigint unsigned is not accepted by execute( )
+                # so use maximum signed value 9223372036854775807 instead of 18446744073709551615
+                # until the issue is resolved
+                take $complex-row = [
+                    1,
+                    'a', '😀😔', Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0xF0, 0x9F, 0x98, 0x80, 0xF0, 0x9F, 0x98, 0x94 ),
+                    -1, 1, 1, 1, 9223372036854775807,
+                    1.1, -0.33e0, 0.33e0,
+                    Buf.new( 0x00 ), Buf.new( 0x00 ),  Buf.new( 0x00 ), Buf.new( 0x00 ) 
+                ]
+            }
+            when 't2' {
+                take [ 1, 1 ];
+                take [ 2, 1 ];
+            }
+            when 't4' {
+                take [ 1, 1, 1 ];
+                take [ 2, Any:U, 1 ];
+            }
+        }
+    }
+}
+
+# match schema.sql definitions
+my $schema = UpRooted::Schema.new( name => %*ENV{ 'UPROOTED_MYSQL_DATABASE' } );
+UpRooted::Table.new( :$schema, name => 't1' );
+UpRooted::Column.new( table => $schema.table( 't1' ), name => 'id', :!is-nullable, type => 'bigint' );
+my @column_types = 'char', 'varchar', 'tinytext', 'text', 'mediumtext', 'longtext', 'tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'decimal', 'float', 'double', 'tinyblob', 'blob', 'mediumblob', 'longblob';
+for @column_types.kv -> $index, $type {
+    my $name = sprintf 'c_%.2d', $index + 1;
+    UpRooted::Column.new( table => $schema.table( 't1' ), :$name, :!is-nullable, :$type );
+}
+UpRooted::Table.new( :$schema, name => 't2' );
+UpRooted::Column.new( table => $schema.table( 't2' ), name => 'id', :!is-nullable, type => 'bigint' );
+UpRooted::Column.new( table => $schema.table( 't2' ), name => 't1_id', :!is-nullable, type => 'bigint' );
+UpRooted::Table.new( :$schema, name => 't4' );
+UpRooted::Column.new( table => $schema.table( 't4' ), name => 'id', :!is-nullable, type => 'bigint' );
+UpRooted::Column.new( table => $schema.table( 't4' ), name => 't1_id', :is-nullable, type => 'bigint' );
+UpRooted::Column.new( table => $schema.table( 't4' ), name => 't2_id', :!is-nullable, type => 'bigint' );
+UpRooted::Relation.new(
+    parent-columns => $schema.table( 't1' ).columns( 'id' ),
+    child-columns => $schema.table( 't2' ).columns( 't1_id' ),
+    name => 'r1'
+);
+UpRooted::Relation.new(
+    parent-columns => $schema.table( 't1' ).columns( 'id' ),
+    child-columns => $schema.table( 't4' ).columns( 't1_id' ),
+    name => 'r2'
+);
+UpRooted::Relation.new(
+    parent-columns => $schema.table( 't2' ).columns( 'id' ),
+    child-columns => $schema.table( 't4' ).columns( 't2_id' ),
+    name => 'r3'
+);
+
+my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+my $reader = UpRooted::Reader::Dummy.new( :$tree );
+my $writer = UpRooted::Writer::MySQL.new( :$connection );
+
+$writer.write( $reader );
+
+is-deeply $connection.execute( 'SELECT * FROM `t1`' ).allrows( )[ 0 ], $complex-row, 'Root row';
+is-deeply $connection.execute( 'SELECT * FROM `t2` ORDER BY `id`' ).allrows( ), ( [ 1, 1 ], [ 2, 1 ] ), 'Leaf rows from t2 Table';
+is-deeply $connection.execute( 'SELECT * FROM `t4` ORDER BY `id`' ).allrows( ), ( [ 1, 1, 1 ], [ 2, Int, 1 ] ), 'Leaf rows from t4 Table';
+
+load( $connection, 'mysql', 'cleanup.sql' );
