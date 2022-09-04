@@ -1,7 +1,7 @@
 {
     "perl": "6.d",
     "name": "UpRooted",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Extract trees of data from relational databases.",
     "authors": [
         "Paweł bbkr Pabian"
@@ -10,6 +10,7 @@
     "provides": {
         "UpRooted::Schema": "lib/UpRooted/Schema.rakumod",
         "UpRooted::Schema::MySQL": "lib/UpRooted/Schema/MySQL.rakumod",
+        "UpRooted::Schema::PostgreSQL": "lib/UpRooted/Schema/PostgreSQL.rakumod",
         "UpRooted::Table": "lib/UpRooted/Table.rakumod",
         "UpRooted::Column": "lib/UpRooted/Column.rakumod",
         "UpRooted::Relation": "lib/UpRooted/Relation.rakumod",

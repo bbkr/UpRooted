@@ -2,6 +2,17 @@ unit module DBITest;
 
 use Test;
 
+=begin pod
+
+=head3 connect
+
+Provide database connection for given driver, currently supported are C<mysql> and C<postgresql>.
+
+It requires C<UPROOTED_DRIVER_HOST>, C<UPROOTED_DRIVER_PORT>, C<UPROOTED_DRIVER_USER>, C<UPROOTED_DRIVER_PASSWORD>
+and C<UPROOTED_DRIVER_DATABASE> environment variables to be set. Where DRIVER is uppercased name of requested driver.
+
+=end pod
+
 sub connect ( $driver ) is export {
 
     sub env-name ( $which ) {
@@ -18,7 +29,8 @@ sub connect ( $driver ) is export {
 
     my $connection = try {
         DBIish.connect(
-            $driver.lc,
+            # postgres is weirdly named, remap it
+            $driver eq 'postgresql' ?? 'Pg' !! $driver,
             host => %*ENV{ env-name( 'host' ) },
             port => %*ENV{ env-name( 'port' ) },
             user => %*ENV{ env-name( 'user' ) },
@@ -28,14 +40,15 @@ sub connect ( $driver ) is export {
     };
     plan skip-all => 'Connection not established.' if $!;
 
-    $connection.execute( 'SET NAMES utf8mb4' );
+    # set of specific driver configurations
+    $connection.execute( 'SET NAMES utf8mb4' ) if $driver eq 'mysql';
 
     return $connection;
 }
 
 sub load ( $connection, $directory, $file ) is export {
 
-    for $*PROGRAM.parent.add( $directory ).add( $file ).lines -> $line {
+    for $*PROGRAM.parent.add( $directory.lc ).add( $file ).lines -> $line {
         state $query = '';
 
         # skip empty lines
