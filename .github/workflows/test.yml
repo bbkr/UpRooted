@@ -17,9 +17,9 @@ jobs:
       postgresql:
         image: postgres:14
         env:
-          - POSTGRES_DB: test
-          - POSTGRES_USER: test
-          - POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
         ports:
           - 5432
         options: --health-cmd="pg_isready" --health-interval=4s --health-timeout=2s --health-retries=8
