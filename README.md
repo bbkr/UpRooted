@@ -48,9 +48,9 @@ This section explains role of every module in `UpRooted` stack and tells which v
 
 It can be discovered automatically by plugins like:
 * `UpRooted::Schema::MySQL`
-* `UpRooted::Schema::PostgreSQL` (work in progress)
+* `UpRooted::Schema::PostgreSQL`
 
-In rare cases you may need to construct or fine tune `UpRooted::Schema` manually. For example if you use MySQL MyISAM engine or MySQL partitioning. Without foreign keys relations between `UpRooted::Table`s cannot be auto discovered and must be defined by hand. There is [separate manual](docs/Schema.md) describing this process.
+In rare cases you may need to construct or fine tune `UpRooted::Schema` manually. For example if you use MySQL MyISAM engine or MySQL partitioning. Or you use PostgreSQL foreign keys relying on unique keys instead of unique constraints. Without proper foreign keys relations between `UpRooted::Table`s cannot be auto discovered and must be defined by hand. There is [separate manual](docs/Schema.md) describing this process.
 
 Creating `UpRooted::Schema` must be done only once per database.
 
