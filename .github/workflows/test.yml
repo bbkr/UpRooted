@@ -14,6 +14,15 @@ jobs:
         ports:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=4s --health-timeout=2s --health-retries=8
+      postgresql:
+        image: postgres:14
+        env:
+          - POSTGRES_DB: test
+          - POSTGRES_USER: test
+          - POSTGRES_PASSWORD: test
+        ports:
+          - 5432
+        options: --health-cmd="pg_isready" --health-interval=4s --health-timeout=2s --health-retries=8
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -32,6 +41,11 @@ jobs:
           UPROOTED_MYSQL_USER: test
           UPROOTED_MYSQL_PASSWORD: test
           UPROOTED_MYSQL_DATABASE: test
+          UPROOTED_POSTGRESQL_HOST: 127.0.0.1
+          UPROOTED_POSTGRESQL_PORT: ${{ job.services.postgresql.ports[3306] }}
+          UPROOTED_POSTGRESQL_USER: test
+          UPROOTED_POSTGRESQL_PASSWORD: test
+          UPROOTED_POSTGRESQL_DATABASE: test
         run: |
           /home/runner/.raku/bin/prove6
             
