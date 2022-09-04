@@ -46,4 +46,4 @@ jobs:
           UPROOTED_POSTGRESQL_USER: test
           UPROOTED_POSTGRESQL_PASSWORD: test
           UPROOTED_POSTGRESQL_DATABASE: test
-        run: /home/runner/.raku/bin/prove6 t/
+        run: /home/runner/.raku/bin/prove6 --incdir=lib/ t/
