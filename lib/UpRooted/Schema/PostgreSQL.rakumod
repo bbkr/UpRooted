@@ -1,7 +1,7 @@
 use UpRooted::Schema;
-use UpRooted::Schema::Information;
+use UpRooted::Schema::Helper::Information;
 
-unit class UpRooted::Schema::PostgreSQL does UpRooted::Schema does UpRooted::Schema::Information;
+unit class UpRooted::Schema::PostgreSQL does UpRooted::Schema does UpRooted::Schema::Helper::Information;
 
 =begin pod
 

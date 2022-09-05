@@ -1,6 +1,7 @@
 use UpRooted::Writer;
+use UpRooted::Helper::DBIConnection;
 
-unit class UpRooted::Writer::MySQL does UpRooted::Writer;
+unit class UpRooted::Writer::MySQL does UpRooted::Writer does UpRooted::Helper::DBIConnection;
 
 =begin pod
 
@@ -10,7 +11,7 @@ UpRooted::Writer::MySQL
 
 =head1 DESCRIPTION
 
-Writes data from L<UpRooted::Reader> as C<.sql> file compatible with MySQL database.
+Writes data from L<UpRooted::Reader> to another MySQL database connection.
 
 =head1 SYNOPSIS
 
@@ -26,16 +27,8 @@ Writes data from L<UpRooted::Reader> as C<.sql> file compatible with MySQL datab
 
 Each write is made on transaction.
 
-=head1 ATTRIBUTES
-
-=head2 connection
-
-MySQL DBIish connection.
-It cannot have any opened transaction.
-
 =end pod
 
-has $.connection is required;
 has $!statement;
 
 method !write-start ( $tree, %conditions ) {
@@ -46,10 +39,8 @@ method !write-start ( $tree, %conditions ) {
 
 method !write-table ( $table ) {
     
-    my $query-insert = 'INSERT INTO ';
-    $query-insert ~= $.connection.quote( $table.schema.name, :as-id ) ~ '.' if $.use-schema-name;
-    $query-insert ~= $.connection.quote( $table.name, :as-id ) ~ ' ';
-    my @query-insert-columns = $table.columns.map: { $.connection.quote( $_.name, :as-id ) };
+    my $query-insert = 'INSERT INTO ' ~ self!table-fqn($table) ~ ' ';
+    my @query-insert-columns = $table.columns.map: { self!column-fqn( $_ ) };
     $query-insert ~= '( ' ~ @query-insert-columns.join( ', ' ) ~ ' ) VALUES ';
     my @query-insert-values = '?' xx @query-insert-columns;
     $query-insert ~= '( ' ~  @query-insert-values.join( ', ' ) ~ ' )';

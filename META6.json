@@ -9,6 +9,7 @@
     "auth": "zef:bbkr",
     "provides": {
         "UpRooted::Schema": "lib/UpRooted/Schema.rakumod",
+        "UpRooted::Schema::Helper::Information": "lib/UpRooted/Schema/Helper/Information.rakumod",
         "UpRooted::Schema::MySQL": "lib/UpRooted/Schema/MySQL.rakumod",
         "UpRooted::Schema::PostgreSQL": "lib/UpRooted/Schema/PostgreSQL.rakumod",
         "UpRooted::Table": "lib/UpRooted/Table.rakumod",

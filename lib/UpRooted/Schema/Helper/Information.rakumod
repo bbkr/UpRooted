@@ -2,13 +2,13 @@ use UpRooted::Table;
 use UpRooted::Column;
 use UpRooted::Relation;
 
-unit role UpRooted::Schema::Information;
+unit role UpRooted::Schema::Helper::Information;
 
 =begin pod
 
 =head1 NAME
 
-UpRooted::Schema::Information
+UpRooted::Schema::Helper::Information
 
 =head1 DESCRIPTION
 
@@ -17,7 +17,7 @@ from Information Schema: L<https://en.wikipedia.org/wiki/Information_schema>.
 
 =head1 METHODS
 
-=head3 discover
+=head2 discover
 
 Expects connection and four queries. Each row in these queries should represent single entity and have following columns:
 

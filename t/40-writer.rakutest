@@ -44,7 +44,7 @@ class UpRooted::Writer::Dummy does UpRooted::Writer {
 
 class UpRooted::Reader::Dummy does UpRooted::Reader {
 
-    method !read-path ( $path, %conditions ) {
+    method !read-path ( :$path, :%conditions ) {
         
         given $path.leaf-table.name {
             when 't1' {

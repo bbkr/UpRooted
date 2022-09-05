@@ -30,6 +30,21 @@ Writes data from L<UpRooted::Reader> as C<.sql> file compatible with MySQL datab
 
 =head1 ATTRIBUTES
 
+=begin pod
+
+=head2 use-schema-name
+
+Controls if Schema name should be used in Fully Qualified Names in C<*-fqn> methods.
+Disabling may be useful for example when UpRooted should read / write using whatever Schema is currently used in connection.
+
+Default to C<True> (enabled).
+
+=end pod
+
+has $.use-schema-name = True;
+
+=begin pod
+
 =head2 file-naming
 
 Optional subroutine that can generate names for subsequent reads.
