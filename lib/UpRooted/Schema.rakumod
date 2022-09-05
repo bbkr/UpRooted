@@ -1,4 +1,4 @@
-unit class UpRooted::Schema;
+unit role UpRooted::Schema;
 
 =begin pod
 
