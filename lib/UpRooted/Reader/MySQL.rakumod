@@ -23,7 +23,7 @@ Reads L<UpRooted::Tree> from MySQL database.
 
     for gather $reader.read( id => 1 ) {
         if $_ ~~ UpRooted::Table {
-            say 'In Table ' ~ .name;
+            say 'In table ' ~ .name;
         }
         else {
             say 'there is row ' ~ $_;

@@ -69,7 +69,7 @@ unlink 'out.sql';
 
 UpRooted::Writer::MySQLFile.new( :!use-schema-name ).write( $reader, c1 => 1 );
 $got-file = 'out.sql'.IO.slurp;
-ok $got-file.contains( 'INSERT INTO `t1`' ), 'Without Schema name';
+ok $got-file.contains( 'INSERT INTO `t1`' ), 'Without UpRooted::Schema name';
 unlink 'out.sql';
 
 UpRooted::Writer::MySQLFile.new( 

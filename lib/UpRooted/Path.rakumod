@@ -97,8 +97,8 @@ Sample looped L<UpRooted::Path>s following root to leaf:
     A -------> B
          B -------> B
 
-Loops should not be processed further by L<UpRooteed::Tree> to avoid... infinite loop :)
-In case of loop being detected C<False> must be returned by L<UpRooteed::Path::analyze-relations> as circuit breaker.
+Loops should not be processed further by L<UpRrooted::Tree> to avoid... infinite loop :)
+In case of loop being detected C<False> must be returned by L<UpRrooted::Path::analyze-relations> as circuit breaker.
 
 Tech note: Only leaf L<UpRooted::Table> is important, those are NOT looped paths from A to C:
 
@@ -109,7 +109,7 @@ Tech note: Only leaf L<UpRooted::Table> is important, those are NOT looped paths
           B -------> B
 
 And they should never be analyzed. If they are encountered during analysis
-it means L<UpRooteed::Tree> did not stop properly.
+it means L<UpRrooted::Tree> did not stop properly.
 
 =end pod
 
@@ -117,11 +117,12 @@ has $!looped = False;
 
 method looped ( ) {
     
-    # if for any reason looped Relations chain was analyzed first
-    # then Path is known to be looped without Relations between root and leaf Tables established
+    # if for any reason looped UpRrooted::Relations chain was analyzed first
+    # then UpRrooted::Path is known to be looped
+    # without UpRrooted::Relations between root and leaf UpRrooted::Tables established
     return $!looped if $!looped;
     
-    # verify if Relations are established
+    # verify if UpRrooted::Relations are established
     sink self.relations;
     
     return $!looped;
@@ -164,7 +165,7 @@ has @!relations;
 
 method relations ( ) {
     
-    die sprintf 'No Relations in Path between Table %s and Table %s.', $.root-table.name, $.leaf-table.name
+    die sprintf 'No UpRooted::Relations in UpRooted::Path between UpRooted::Table %s and UpRooted::Table %s.', $.root-table.name, $.leaf-table.name
         unless $.root-table === $.leaf-table or @!relations;
     
     return @!relations;
@@ -193,7 +194,7 @@ method is-nullable ( ) {
 Check if new chain of L<UpRooted::Relation>s gives additional insight
 how and in which order to reach leaf L<UpRooted::Table>.
 
-Will return C<True> if Tree can proceed.
+Will return C<True> if L<UpRooted::Tree> can proceed.
 Or C<False> to indicate that loop occured
 and this L<UpRooted::Relation>s chain should not be analyzed further.
 
@@ -201,22 +202,22 @@ and this L<UpRooted::Relation>s chain should not be analyzed further.
 
 method analyze-relations ( *@relations where { .elems } ) {
     
-    die sprintf 'Relations root Table is different than %s.', $.root-table.name
+    die sprintf 'UpRooted::Relations root UpRooted::Table is different than %s.', $.root-table.name
         unless @relations.head.parent-table === $.root-table;
     
     for @relations.rotor( 2 => -1 ) -> ( $a, $b ) {
-        die sprintf 'Parent Relation %s and child Relation %s are not referring to the same Table.', $a.name, $b.name
+        die sprintf 'Parent UpRooted::Relation %s and child UpRooted::Relation %s are not referring to the same UpRooted::Table.', $a.name, $b.name
             unless $a.child-table === $b.parent-table;
     }
     
     for @relations[ ^( @relations.elems - 1 ) ] {
         state %parents;
         %parents{ .parent-table.name } = True;
-        die sprintf 'Table %s seen twice before reaching leaf Table.', .child-table.name
+        die sprintf 'UpRooted::Table %s seen twice before reaching leaf UpRooted::Table.', .child-table.name
             if %parents{ .child-table.name }:exists;
     }
         
-    die sprintf 'Relations leaf Table is different than %s.', $.leaf-table.name
+    die sprintf 'UpRooted::Relations leaf UpRooted::Table is different than %s.', $.leaf-table.name
         unless @relations.tail.child-table === $.leaf-table;
     
     if @relations.first: *.parent-table === $.leaf-table {
@@ -224,12 +225,12 @@ method analyze-relations ( *@relations where { .elems } ) {
         return False;
     }
     
-    # bump order to longest analyzed Relations chain
+    # bump order to longest analyzed UpRooted::Relations chain
     $!order max= @relations.elems;
     
     if @!relations.elems.not {
 
-        # any Relations chain is better than none
+        # any UpRooted::Relations chain is better than none
         @!relations = @relations;
         
     }
@@ -239,13 +240,13 @@ method analyze-relations ( *@relations where { .elems } ) {
         
             # TODO check for horse riddle
             
-            # shorter nullable Relations chain is better than longer nullable one
+            # shorter nullable UpRooted::Relations chain is better than longer nullable one
             @!relations = @relations if @relations.elems < @!relations.elems;
 
         }
         else {
 
-            # not nullable Relations chain is always better than nullable one, regardless of length
+            # not nullable UpRooted::Relations chain is always better than nullable one, regardless of length
             @!relations = @relations;
             
             # TODO clear horse riddle flag if any
@@ -258,12 +259,12 @@ method analyze-relations ( *@relations where { .elems } ) {
         if so @relations.first: *.is-nullable {
         
             # do nothing,
-            # nullable Relations chain is worse than not nullable one, regardless of length
+            # nullable UpRooted::Relations chain is worse than not nullable one, regardless of length
 
         }
         else {
 
-            # shorter not nullable Relations chain is better than longer not nullable one
+            # shorter not nullable UpRooted::Relations chain is better than longer not nullable one
             @!relations = @relations if @relations.elems < @!relations.elems;
         
         }

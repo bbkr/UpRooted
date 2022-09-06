@@ -18,16 +18,16 @@ my $schema = UpRooted::Schema::MySQL.new( :$connection );
 my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
 my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
 
-subtest 'no data' => {
+subtest 'No data' => {
 
     plan 1;
 
     my @result = gather $reader.read( );
-    ok all( @result ) ~~ UpRooted::Table, 'Empty Tables';
+    ok all( @result ) ~~ UpRooted::Table, 'Empty UpRooted::Tables';
     
 };
 
-subtest 'with data' => {
+subtest 'With data' => {
 
     plan 19;
 
@@ -35,7 +35,7 @@ subtest 'with data' => {
 
     my @result = gather $reader.read( id => 1 );
     
-    is @result.shift.name, 't1', 'Root table';
+    is @result.shift.name, 't1', 'Root UpRooted::Table';
     is-deeply @result.shift, [
         1,
         'a', '😀😔', Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0x61 ), Buf.new( 0xF0, 0x9F, 0x98, 0x80, 0xF0, 0x9F, 0x98, 0x94 ),
@@ -44,31 +44,31 @@ subtest 'with data' => {
         Buf.new( 0x00 ), Buf.new( 0x00 ),  Buf.new( 0x00 ), Buf.new( 0x00 ) 
     ], 'Root data';
 
-    # also confirms if no data from tree starting at id = 2 leaked
-    is @result.shift.name, 't2', 'Not nullable single column relation table';
-    is-deeply @result.shift, [ 1, 1 ], 'Not nullable single column relation data';
-    is-deeply @result.shift, [ 2, 1 ], 'Not nullable single column relation data';
+    # also confirms if no data from UpRooted::Tree starting at id = 2 leaked
+    is @result.shift.name, 't2', 'UpRooted::Table with not nullable UpRooted::Relation with single UpRooted::Column';
+    is-deeply @result.shift, [ 1, 1 ], 'Row data';
+    is-deeply @result.shift, [ 2, 1 ], 'Row data';
         
-    is @result.shift.name, 't6', 'Self loop table';
-    is-deeply @result.shift, [ 1, 1, 1 ], 'Self loop data';
+    is @result.shift.name, 't6', 'Self loop UpRooted::Table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
     
-    is @result.shift.name, 't9', 'Horse riddle table';
+    is @result.shift.name, 't9', 'Horse riddle UpRooted::Table';
     # TODO, behavior not decided yet 
     
-    is @result.shift.name, 't3', 'Not nullable relations of different lengths table.';
-    is-deeply @result.shift, [ 1, 1, 1 ], 'Not nullable relations of different lengths data';
-    is-deeply @result.shift, [ 2, 1, 2 ], 'Not nullable relations of different lengths data';
+    is @result.shift.name, 't3', 'UpRooted::Table with not nullable UpRooted::Relations of different lengths.';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
+    is-deeply @result.shift, [ 2, 1, 2 ], 'Row data';
     
-    is @result.shift.name, 't4', 'Not nullable relations longer than nullable one table';
-    is-deeply @result.shift, [ 1, 1, 1 ], 'Not nullable relations longer than nullable one data';
+    is @result.shift.name, 't4', 'UpRooted::Table with not nullable UpRooted::Relation longer than nullable one';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
     
-    is @result.shift.name, 't7', 'Long loop table';
-    is-deeply @result.shift, [ 1, 1, 1 ], 'Long loop data';
-    is @result.shift.name, 't8', 'Long loop table';
-    is-deeply @result.shift, [ 1, 1, 1 ], 'Long loop data';
+    is @result.shift.name, 't7', 'Long loop UpRooted::Table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
+    is @result.shift.name, 't8', 'Long loop UpRooted::Table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
 
-    is @result.shift.name, 't5', 'Multi column relation table';
-    is-deeply @result.shift, [ 1, 1, 1 ], 'Multi column relation data';
+    is @result.shift.name, 't5', 'UpRooted::Table with UpRooted::Relation with multiple UpRooted::Columns';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
     
 };
 

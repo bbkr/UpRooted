@@ -32,8 +32,8 @@ Writes data from L<UpRooted::Reader> as C<.sql> file compatible with MySQL datab
 
 =head2 use-schema-name
 
-Controls if Schema name should be used in Fully Qualified Names in C<*-fqn> methods.
-Disabling may be useful for example when UpRooted should read / write using whatever Schema is currently used in connection.
+Controls if L<UpRooted::Schema> name should be used in Fully Qualified Names in C<*-fqn> methods.
+Disabling may be useful for example when UpRooted should read / write using whatever schema is currently used in connection.
 
 Default to C<True> (enabled).
 
@@ -78,7 +78,7 @@ method !write-start ( $tree, %conditions ) {
 
 method !write-table ( $table ) {
     
-    # TODO there may be no data for given Table
+    # TODO there may be no data for given UpRooted::Table
     # this should only store current UpRooted::Table instance and be lazy
     my $query-insert = 'INSERT INTO ';
     $query-insert ~= self!quote-label( $table.schema.name ) ~ '.' if $.use-schema-name;
@@ -115,7 +115,7 @@ method !write-flush ( ) {
     
     # TODO batching should close any unfinished query here
     
-    # end of data for this Table
+    # end of data for this UpRooted::Table
     %!sql-cache = ( );
 }
 

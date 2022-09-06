@@ -21,7 +21,7 @@ This spanning tree is saved as set of paths from root node to every other reacha
 
     my $tree = UpRooted::Tree.new( root-table => $books );
     
-    # how and in which order to reach each Table
+    # how and in which order to reach each table
     for my $tree.paths -> $path {
         say join '->', $path.root-table.name, $path.relations.map: *.child-table.name;
     }
@@ -44,27 +44,27 @@ submethod BUILD ( :$!root-table ) {
     
         my $table;
         if @relations {
-            # which Table is at the end of Relations chain
+            # which UpRooted::Table is at the end of UpRooted::Relations chain
             $table = @relations.tail.child-table;
         }
         else {
-            # if there are no Relations we are in Tree root
+            # if there are no UpRooted::Relations we are in UpRooted::Tree root
             $table = $!root-table;
         }
         
-        # start new Path to leaf Table
-        # or take existing one if leaf Table was already reached in the past
+        # start new UpRooted::Path to leaf UpRooted::Table
+        # or take existing one if leaf UpRooted::Table was already reached in the past
         my $path := %!paths{ $table.name } //= UpRooted::Path.new( root-table => $!root-table, leaf-table => $table );
         
         if @relations {
-            # present new chain of Relations to Path for analysis
+            # present new chain of UpRooted::Relations to UpRooted::Path for analysis
             my $continue = $path.analyze-relations( @relations );
             
-            # circuit breaker when Path detects loop
+            # circuit breaker when UpRooted::Path detects loop
             return unless $continue;
         }
         
-        # DFS descent to child Tables
+        # DFS descent to child UpRooted::Tables
         for $table.children-relations -> $relation  {
             samewith( |@relations, $relation );
         }
@@ -80,7 +80,7 @@ submethod BUILD ( :$!root-table ) {
 =head2 paths
 
 Returns L<UpRooted::Path>s from root L<UpRooted::Table> to all leaf L<UpRooted::Table>s
-reachable by parent-child relation.
+reachable by chain of parent-child <UpRooted::Relation>s.
 
 L<UpRooted::Path>s are sorted in a way that ensured every leaf L<UpRooted::Table>
 will have its dependencies met.

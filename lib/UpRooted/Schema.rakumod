@@ -8,7 +8,7 @@ UpRooted::Schema
 
 =head1 DESCRIPTION
 
-Represents Schema level of relational database.
+Represents schema level of relational database.
 
 =head1 SYNOPSIS
 
@@ -18,7 +18,7 @@ Represents Schema level of relational database.
 
 =head2 name
 
-Schema name that will be first part of fully qualified naming convention C<schema.table.column>.
+Schema name that will be first part of Fully Qualified Naming convention C<schema.table.column>.
 
 =end pod
 
@@ -41,10 +41,10 @@ and you should NEVER call this method manually.
 
 method add-table ( $table! ) {
     
-    die sprintf 'Table %s is from different Schema than %s.', $table.name, $.name
+    die sprintf 'UpRooted::Table %s is from different UpRooted::Schema than %s.', $table.name, $.name
         unless $table.schema === self;
     
-    die sprintf 'Table %s ia already present in Schema %s.', $table.name, $.name
+    die sprintf 'UpRooted::Table %s ia already present in UpRooted::Schema %s.', $table.name, $.name
         if %!tables{ $table.name }:exists;
     
     %!tables{ $table.name } = $table;
@@ -60,7 +60,7 @@ Returns L<UpRooted::Table> of given C<$name>.
 
 method table ( Str:D $name! ) {
     
-    die sprintf 'Table %s is not present in Schema %s.', $name, $.name
+    die sprintf 'UpRooted::Table %s is not present in UpRooted::Schema %s.', $name, $.name
         unless %!tables{ $name }:exists;
     
     return %!tables{ $name };

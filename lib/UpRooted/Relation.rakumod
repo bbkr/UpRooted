@@ -8,7 +8,7 @@ UpRooted::Relation
 
 =head1 DESCRIPTION
 
-Represents Relation (constraint) between Tables in relational database.
+Represents relation (constraint) between tables in relational database.
 
 =head1 SYNOPSIS
 
@@ -41,20 +41,20 @@ submethod BUILD (
 	Str:D :$!name!
 ) {
 
-	die sprintf 'Parent and child Columns count different in Relation %s.', $!name
+	die sprintf 'Parent and child UpRooted::Columns count different in UpRooted::Relation %s.', $!name
 		unless @!parent-columns.elems == @!child-columns.elems;
 
-	die sprintf 'Parent Columns must be from the same Table in Relation %s.', $!name
+	die sprintf 'Parent UpRooted::Columns must be from the same UpRooted::Table in UpRooted::Relation %s.', $!name
 		unless [===]( @!parent-columns.map: *.table );
 	
-	die sprintf 'Child Columns must be from the same Table in Relation %s.', $!name 
+	die sprintf 'Child UpRooted::Columns must be from the same UpRooted::Table in UpRooted::Relation %s.', $!name 
 		unless [===]( @!child-columns.map: *.table );
 
 }
 
 submethod TWEAK {
 
-	# register Relation in Table
+	# register UpRooted::Relation in UpRooted::Table
     self.parent-table.add-child-relation( self );
 }
 
@@ -117,9 +117,9 @@ method child-columns ( ) {
 L<UpRooted::Relation> is nullable if any L<UpRooted::Column>
 from child L<UpRooted::Table> used in this L<UpRooted::Relation> is nullable.
 
-Tech note: Not nullable Relations are extremely important for data extraction
-because it is guaranteed to discover all rows in child Table in given Tree
-by following this Relation from all rows in parent Table.
+Tech note: Not nullable L<UpRooted::Relation>s are extremely important for data extraction
+because it is guaranteed to discover all rows in child L<UpRooted::Table> in given L<UpRooted::Tree>
+by following this L<UpRooted::Relation> from all rows in parent L<UpRooted::Table>.
 
 =end pod
 

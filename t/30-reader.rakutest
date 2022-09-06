@@ -13,32 +13,32 @@ plan 2;
 
 class UpRooted::Reader::Dummy does UpRooted::Reader {
 
-    # emulate returning dummy rows from each leaf Table
+    # emulate returning dummy rows from each leaf UpRooted::Table
     method !read-path ( :$path, :%conditions ) {
         
         my $table = $path.leaf-table;
         
-        # emulate root Column matching conditions, otherwise return whatever
+        # emulate root UpRooted::Column matching conditions, otherwise return whatever
         my @row = $path.leaf-table.columns.map: { %conditions{ .name } // '*' };
         
-        # emulate more rows as Relations chain gets longer
+        # emulate more rows as UpRooted::Relations chain gets longer
         state $calls = 0;
         take @row for ^(++$calls);
     }
 }
 
-subtest 'no implementation' => {
+subtest 'No implementation' => {
     
     plan 1;
     
     my $schema = UpRooted::Schema.new( name => 's1' );
     my $tree = UpRooted::Tree.new( root-table => UpRooted::Table.new( :$schema, name => 't1' ) );
     
-    dies-ok { gather UpRooted::Reader.new( :$tree ).read( ) }, 'Reader must have implementation';
+    dies-ok { gather UpRooted::Reader.new( :$tree ).read( ) }, 'UpRooted::Reader must have implementation';
 
 };
 
-subtest 'tree paths' => {
+subtest 'UpRooted::Tree paths' => {
     
     plan 10;
     
@@ -65,17 +65,17 @@ subtest 'tree paths' => {
     
     throws-like {
         gather $reader.read( x1 => 1 );
-    }, Exception, message => 'Column x1 is not present in Table t1.', 'Columns from conditions must be present in root Table';
+    }, Exception, message => 'UpRooted::Column x1 is not present in UpRooted::Table t1.', 'UpRooted::Columns from conditions must be present in root UpRooted::Table';
     
     my @data = gather $reader.read( c1 => 1 );
     
-    is @data.shift, $schema.table( 't1' ), 'Root table';
-    is-deeply @data.shift, [ 1 ], 'Root row';
+    is @data.shift, $schema.table( 't1' ), 'Root UpRooted::Table';
+    is-deeply @data.shift, [ 1 ], 'Row data';
     
-    is @data.shift, $schema.table( 't2' ), 'Leaf table';
-    is-deeply @data.shift, [ '*' ], 'Leaf row' for ^2;
+    is @data.shift, $schema.table( 't2' ), 'Leaf UpRooted::Table';
+    is-deeply @data.shift, [ '*' ], 'Row data' for ^2;
     
-    is @data.shift, $schema.table( 't3' ), 'Leaf table';
-    is-deeply @data.shift, [ '*', '*' ], 'Leaf row' for ^3;
+    is @data.shift, $schema.table( 't3' ), 'Leaf UpRooted::Table';
+    is-deeply @data.shift, [ '*', '*' ], 'Row data' for ^3;
     
 };

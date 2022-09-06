@@ -26,12 +26,12 @@ Converts L<UpRooted::Path> to query, executes it and produces rows that can be c
 
 method !read-path ( :$path, :%conditions ) {
     
-    # get list of columns from leaf Table
+    # get list of UpRooted::Column names from leaf UpRooted::Table
     my $query-select = 'SELECT ';
     my @query-select-columns = $path.leaf-table.columns.map: { self!column-fqn( $_ ) };
     $query-select ~= @query-select-columns.join: ', ';
     
-    # make chain of joins from root Table to leaf Table
+    # make chain of joins from root UpRooted::Table to leaf UpRooted::Table
     my $query-from = 'FROM ';
     my @query-from-tables = self!table-fqn( $.tree.root-table );
     for $path.relations -> $relation {
@@ -46,7 +46,8 @@ method !read-path ( :$path, :%conditions ) {
     }
     $query-from ~= @query-from-tables.join: ' ';
     
-    # add root Table conditions, the same for all root to leaf chains
+    # add root UpRooted::Table conditions
+    # it will be the same for all UpRooted::Paths
     my $query-where = 'WHERE ';
     if %conditions {
         my @query-where-conditions = %conditions.sort.map: {

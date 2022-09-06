@@ -12,41 +12,41 @@ load( $connection, 'postgresql', 'cleanup.sql' );
 plan 14;
 
 my $schema;
-lives-ok { $schema = UpRooted::Schema::PostgreSQL.new( :$connection ) }, 'Schema discovered';
+lives-ok { $schema = UpRooted::Schema::PostgreSQL.new( :$connection ) }, 'UpRooted::Schema discovered';
 
-is-deeply $schema.tables, (), 'Schema is empty';
+is-deeply $schema.tables, (), 'UpRooted::Schema is empty';
 
 load( $connection, 'postgresql', 'schema.sql' );
-lives-ok { $schema = UpRooted::Schema::PostgreSQL.new( :$connection ) }, 'Schema discovered';
+lives-ok { $schema = UpRooted::Schema::PostgreSQL.new( :$connection ) }, 'UpRooted::Schema discovered';
 
 # views should not be present here
-is-deeply $schema.tables.map( { .name } ), ( 't1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9' ), 'Tables present';
+is-deeply $schema.tables.map( { .name } ), ( 't1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9' ), 'UpRooted::Tables present';
 
-# no need to check every Table
+# no need to check every UpRooted::Table
 # TODO: lack of virtual columns test
-is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'id', 'c_01', 'c_02', 'c_03', 'c_04', 'c_05', 'c_06', 'c_07', 'c_08', 'c_09', 'c_10', 'c_11', 'c_12' ), 'Columns present';
+is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'id', 'c_01', 'c_02', 'c_03', 'c_04', 'c_05', 'c_06', 'c_07', 'c_08', 'c_09', 'c_10', 'c_11', 'c_12' ), 'UpRooted::Columns present';
 
 # TODO: more types - JSON, XML, bit string, date and time, geometric, etc.
-is-deeply $schema.table( 't1' ).columns.map( { .type } ), ( 'bigint', 'character', 'character varying', 'text', 'smallint', 'integer', 'bigint', 'numeric', 'real', 'double precision', 'bytea', 'boolean', 'array' ), 'Columns types';
+is-deeply $schema.table( 't1' ).columns.map( { .type } ), ( 'bigint', 'character', 'character varying', 'text', 'smallint', 'integer', 'bigint', 'numeric', 'real', 'double precision', 'bytea', 'boolean', 'array' ), 'UpRooted::Columns types';
 
-# no need to check every Column, just both cases
-is $schema.table( 't1' ).columns( 'id', 'c_01' ).map( { .is-nullable } ), ( False, True ), 'Columns nullability';
+# no need to check every UpRooted::Column, just both cases
+is $schema.table( 't1' ).columns( 'id', 'c_01' ).map( { .is-nullable } ), ( False, True ), 'UpRooted::Columns nullability';
 
-# check which Tables are connected with Relations,
+# check which UpRooted::Tables are connected with UpRooted::Relations,
 # no need to check all of them, just specific cases
-is-deeply $schema.table( 't1' ).children-relations.map( { .child-table.name } ), ( 't2', 't3', 't4', 't6', 't7', 't8', 't9', 't9' ), 'Relations present';
-is-deeply $schema.table( 't4' ).children-relations.map( { .child-table.name } ), ( 't5', ), 'Multi column Relations present';
-is-deeply $schema.table( 't6' ).children-relations.map( { .child-table.name } ), ( 't6', ), 'Self loop Relations present';
-is-deeply $schema.table( 't7' ).children-relations.map( { .child-table.name } ), ( 't8', ), 'Long loop Relations present';
-is-deeply $schema.table( 't8' ).children-relations.map( { .child-table.name } ), ( 't7', ), 'Long loop Relations present';
+is-deeply $schema.table( 't1' ).children-relations.map( { .child-table.name } ), ( 't2', 't3', 't4', 't6', 't7', 't8', 't9', 't9' ), 'UpRooted::Relations present';
+is-deeply $schema.table( 't4' ).children-relations.map( { .child-table.name } ), ( 't5', ), 'Multi column UpRooted::Relations present';
+is-deeply $schema.table( 't6' ).children-relations.map( { .child-table.name } ), ( 't6', ), 'Self loop UpRooted::Relations present';
+is-deeply $schema.table( 't7' ).children-relations.map( { .child-table.name } ), ( 't8', ), 'Long loop UpRooted::Relations present';
+is-deeply $schema.table( 't8' ).children-relations.map( { .child-table.name } ), ( 't7', ), 'Long loop UpRooted::Relations present';
 
-# no need to check every Relation,
-# just parent and child Columns in one of them
-is-deeply $schema.table( 't4' ).children-relations[0].parent-columns.map( { .name } ), ( 't1_id', 't2_id' ), 'Relation parent Columns';
-is-deeply $schema.table( 't4' ).children-relations[0].child-columns.map( { .name } ), ( 't4_t1_id', 't4_t2_id' ), 'Relation child Columns';
+# no need to check every UpRooted::Relation,
+# just parent and child UpRooted::Columns in one of them
+is-deeply $schema.table( 't4' ).children-relations[0].parent-columns.map( { .name } ), ( 't1_id', 't2_id' ), 'UpRooted::Relation parent UpRooted::Columns';
+is-deeply $schema.table( 't4' ).children-relations[0].child-columns.map( { .name } ), ( 't4_t1_id', 't4_t2_id' ), 'UpRooted::Relation child UpRooted::Columns';
 
 # WARNING: check only if information_schema was read correctly,
-# do not repeat exhaustive Schema tests here (they are already present),
-# do not write Tree and Reader related tests (they are in separate file)
+# do not repeat exhaustive UpRooted::Schema tests here (they are already present),
+# do not write UpRooted::Tree and UpRooted::Reader related tests (they are in separate file)
 
 load( $connection, 'postgresql', 'cleanup.sql' );

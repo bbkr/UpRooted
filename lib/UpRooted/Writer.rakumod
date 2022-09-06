@@ -19,8 +19,8 @@ Requires specific implementation for given output type.
     my $writer = UpRooted::Writer.new( );
     $writer.write( :$reader, id => 1 );
 
-If you need to write to Schema of different name
-you can skip original Schema name in Fully Qualified Names by setting:
+If you need to write to schema of different name
+you can skip original L<UpRooted::Schema> name in Fully Qualified Names by setting:
 
     my $writer = UpRooted::Writer.new( :!use-schema-name );
     
@@ -66,7 +66,7 @@ method write ( $reader, *%conditions ) {
 
         if $_ ~~ UpRooted::Table {
             
-            # flush only when next Table is gathered
+            # flush only when next UpRooted::Table is gathered
             self!write-flush( ) if $had-table;
             $had-table = True;
             

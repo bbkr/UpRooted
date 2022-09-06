@@ -78,8 +78,8 @@ method !discover ( :$connection!, Str:D :$query-schemata!, Str:D :$query-tables!
 
     for fetch-array-of-hashes( $connection, $query-relations ).classify( *{ 'name' } ).kv -> $name, @columns {
 
-        # it is impossible in known databases to have foreign key of given name referencing two different Tables
-        # so it is safe to take parent and child Table names from first Column set
+        # it is impossible in known databases to have foreign key of given name referencing two different tables
+        # so it is safe to take parent and child table names from first column set
         my $parent-table := self.table( @columns.first{ 'parent_table_name' } );
         my $child-table := self.table( @columns.first{ 'child_table_name' } );
 

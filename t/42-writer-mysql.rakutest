@@ -87,8 +87,8 @@ my $writer = UpRooted::Writer::MySQL.new( :$connection );
 
 $writer.write( $reader );
 
-is-deeply $connection.execute( 'SELECT * FROM `t1`' ).allrows( )[ 0 ], $complex-row, 'Root row';
-is-deeply $connection.execute( 'SELECT * FROM `t2` ORDER BY `id`' ).allrows( ), ( [ 1, 1 ], [ 2, 1 ] ), 'Leaf rows from t2 Table';
-is-deeply $connection.execute( 'SELECT * FROM `t4` ORDER BY `id`' ).allrows( ), ( [ 1, 1, 1 ], [ 2, Int, 1 ] ), 'Leaf rows from t4 Table';
+is-deeply $connection.execute( 'SELECT * FROM `t1`' ).allrows( )[ 0 ], $complex-row, 'Root row from t1 UpRooted::Table';
+is-deeply $connection.execute( 'SELECT * FROM `t2` ORDER BY `id`' ).allrows( ), ( [ 1, 1 ], [ 2, 1 ] ), 'Leaf rows from t2 UpRooted::Table';
+is-deeply $connection.execute( 'SELECT * FROM `t4` ORDER BY `id`' ).allrows( ), ( [ 1, 1, 1 ], [ 2, Int, 1 ] ), 'Leaf rows from t4 UpRooted::Table';
 
 load( $connection, 'mysql', 'cleanup.sql' );

@@ -72,7 +72,7 @@ Available variants:
 * `UpRooted::Reader::MySQL`
 * `UpRooted::Reader::PostgreSQL` (work in progress)
 
-Creating `UpRooted::Reader` must be done only once per `Uprooted::Tree`.
+Creating `UpRooted::Reader` must be done only once per `UpRooted::Tree`.
 
 ### UpRooted::Writer
 
