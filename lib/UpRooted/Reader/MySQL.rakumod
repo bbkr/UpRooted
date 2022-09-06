@@ -30,6 +30,6 @@ Reads L<UpRooted::Tree> from MySQL database.
         }
     }
 
-DBIish connection must be kept open during every L<read( )> call.
+Connection must be kept open during every L<read( )> call.
 
 =end pod

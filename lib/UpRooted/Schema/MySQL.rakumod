@@ -26,10 +26,10 @@ Note that C<database> MUST be specified for connection.
 Connection is only used during construction
 and may be closed after L<UpRooted::Schema> is created.
 
-=head1 CASE SENSITIVITY WARNINGS
+=head1 CASE SENSITIVITY
 
 Column names in C<information_schema> have different case in various MySQL implementations.
-Always alias columns to have lowercased names as Hash keys.
+Always alias columns to have lowercased names in queries results.
 For example:
 
     SELECT `sth` AS `sth` FROM `information_schema`.`sth` ...

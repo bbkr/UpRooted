@@ -47,8 +47,8 @@ Consider following examples:
         FOREIGN KEY ( "foo_id" ) REFERENCES "foo" ( "id" )
     );
 
-This is constraint that uses underlying unique index.
-Relations depending on constraint will be discovered as expected.
+This PRIMARY KEY is constraint that uses underlying unique index.
+FOREIGN KEY relations depending on this constraint will be discovered as expected.
 
     CREATE TABLE "foo" (
         "id" int,
@@ -59,8 +59,8 @@ Relations depending on constraint will be discovered as expected.
         FOREIGN KEY ( "foo_id" ) REFERENCES "foo" ( "id" )
     );
 
-This is also constraint that uses underlying unique index.
-Relations depending on constraint will be discovered as expected.
+This UNIQUE is also constraint that uses underlying unique index.
+FOREIGN KEY relations depending on this constraint will be discovered as expected.
 
     CREATE TABLE "foo" (
         "id" int
@@ -71,11 +71,11 @@ Relations depending on constraint will be discovered as expected.
         FOREIGN KEY ( "foo_id" ) REFERENCES "foo" ( "id" )
     );
 
-This is just unique index.
+This is just unique INDEX.
 It will work as expected from data storage / consistency point of view
-but relations depending on index will not be discovered as expected.
+but FOREIGN KEY relations depending on it will not be discovered as expected.
 
-This is because L<UpRooted::Schema::PostgreSQL> uses on Information Schema
+This is because L<UpRooted::Schema::PostgreSQL> uses Information Schema
 which contains information which unique constraint will be used during foreign key check
 but does not contain information which underlying unique index will be used.
 

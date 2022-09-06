@@ -32,7 +32,7 @@ C<$query-relations> - constraint C<name>, C<parent_table_name>, C<parent_column_
 WARNING: All returned column names (not values) must be lowercased.
 
 Returns schema name when discovery is complete
-so that class using this role can set C<$!name> attribute during construction.
+so that class composing this role can set C<$!name> attribute during construction.
 
 =end pod
 
@@ -47,10 +47,8 @@ method !discover ( :$connection!, Str:D :$query-schemata!, Str:D :$query-tables!
         return @data;
     }
     
-    # schemata
     my $name = fetch-array-of-hashes( $connection, $query-schemata )[ 0 ]{ 'name' };
     
-    # tables
     for fetch-array-of-hashes( $connection, $query-tables ) -> %table {
         
         UpRooted::Table.new(
@@ -60,7 +58,6 @@ method !discover ( :$connection!, Str:D :$query-schemata!, Str:D :$query-tables!
         
     }
 
-    # columns
     for fetch-array-of-hashes( $connection, $query-columns ).classify( *{ 'table_name' } ).kv -> $name, @columns {
 
         my $table := self.table( $name );
@@ -79,7 +76,6 @@ method !discover ( :$connection!, Str:D :$query-schemata!, Str:D :$query-tables!
         
     }
 
-    # relations
     for fetch-array-of-hashes( $connection, $query-relations ).classify( *{ 'name' } ).kv -> $name, @columns {
 
         # it is impossible in known databases to have foreign key of given name referencing two different Tables

@@ -26,9 +26,9 @@ has $.connection is required;
 =head2 use-schema-name
 
 Controls if Schema name should be used in Fully Qualified Names in C<*-fqn> methods.
-Disabling may be useful for example when UpRooted should read / write using whatever Schema is currently used in connection.
+Disabling may be useful for example when UpRooted should read from / write to whatever Schema is currently used in connection.
 
-Default to C<True>.
+Default to C<True> (enabled).
 
 =end pod
 

@@ -30,8 +30,6 @@ Writes data from L<UpRooted::Reader> as C<.sql> file compatible with MySQL datab
 
 =head1 ATTRIBUTES
 
-=begin pod
-
 =head2 use-schema-name
 
 Controls if Schema name should be used in Fully Qualified Names in C<*-fqn> methods.
