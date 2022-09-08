@@ -1,6 +1,4 @@
-use UpRooted::Reader;
-
-unit role UpRooted::Reader::Helper::Joiner;
+unit role UpRooted::Reader::Helper::DBISelect;
 
 =begin pod
 
@@ -10,7 +8,7 @@ UpRooted::Reader::Helper::Joiner
 
 =head1 DESCRIPTION
 
-Converts L<UpRooted::Path>s in L<UpRooted::Tree> to series of JOIN
+Converts L<UpRooted::Path> to SELECT ... JOIN ... JOIN .. WHERE query
 to reach data in leaf L<UpRooted::Table>s starting from given row in root L<UpRooted::Table>.
 
 Requires L<UpRooted::Helper::DBIConnection> to be used by class composing this role.
