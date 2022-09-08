@@ -1,26 +1,32 @@
 {
     "perl": "6.d",
     "name": "UpRooted",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Extract trees of data from relational databases.",
     "authors": [
         "Paweł bbkr Pabian"
     ],
     "auth": "zef:bbkr",
     "provides": {
-        "UpRooted::Schema": "lib/UpRooted/Schema.rakumod",
-        "UpRooted::Schema::MySQL": "lib/UpRooted/Schema/MySQL.rakumod",
-        "UpRooted::Schema::PostgreSQL": "lib/UpRooted/Schema/PostgreSQL.rakumod",
-        "UpRooted::Table": "lib/UpRooted/Table.rakumod",
-        "UpRooted::Column": "lib/UpRooted/Column.rakumod",
-        "UpRooted::Relation": "lib/UpRooted/Relation.rakumod",
-        "UpRooted::Path": "lib/UpRooted/Path.rakumod",
-        "UpRooted::Tree": "lib/UpRooted/Tree.rakumod",
-        "UpRooted::Reader": "lib/UpRooted/Reader.rakumod",
-        "UpRooted::Reader::MySQL": "lib/UpRooted/Reader/MySQL.rakumod",
-        "UpRooted::Writer": "lib/UpRooted/Writer.rakumod",
-        "UpRooted::Writer::MySQLFile": "lib/UpRooted/Writer/MySQLFile.rakumod",
-        "UpRooted::Writer::Helper::File": "lib/UpRooted/Writer/Helper/File.rakumod"
+        "UpRooted::Column" : "lib/UpRooted/Column.rakumod",
+        "UpRooted::Helper::DBIConnection" : "lib/UpRooted/Helper/DBIConnection.rakumod",
+        "UpRooted::Path" : "lib/UpRooted/Path.rakumod",
+        "UpRooted::Reader::Helper::DBISelect" : "lib/UpRooted/Reader/Helper/DBISelect.rakumod",
+        "UpRooted::Reader::MySQL" : "lib/UpRooted/Reader/MySQL.rakumod",
+        "UpRooted::Reader" : "lib/UpRooted/Reader.rakumod",
+        "UpRooted::Relation" : "lib/UpRooted/Relation.rakumod",
+        "UpRooted::Schema::Helper::Information" : "lib/UpRooted/Schema/Helper/Information.rakumod",
+        "UpRooted::Schema::MySQL" : "lib/UpRooted/Schema/MySQL.rakumod",
+        "UpRooted::Schema::PostgreSQL" : "lib/UpRooted/Schema/PostgreSQL.rakumod",
+        "UpRooted::Schema" : "lib/UpRooted/Schema.rakumod",
+        "UpRooted::Table" : "lib/UpRooted/Table.rakumod",
+        "UpRooted::Tree" : "lib/UpRooted/Tree.rakumod",
+        "UpRooted::Writer::Helper::DBIInsert" : "lib/UpRooted/Writer/Helper/DBIInsert.rakumod",
+        "UpRooted::Writer::Helper::File" : "lib/UpRooted/Writer/Helper/File.rakumod",
+        "UpRooted::Writer::Helper::FileInsert" : "lib/UpRooted/Writer/Helper/FileInsert.rakumod",
+        "UpRooted::Writer::MySQL" : "lib/UpRooted/Writer/MySQL.rakumod",
+        "UpRooted::Writer::MySQLFile" : "lib/UpRooted/Writer/MySQLFile.rakumod",
+        "UpRooted::Writer" : "lib/UpRooted/Writer.rakumod"
     },
     "depends": [
         "DBIish"

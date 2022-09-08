@@ -14,7 +14,7 @@ plan 3;
 
 class UpRooted::Reader::Dummy does UpRooted::Reader {
 
-    method !read-path ( $path, %conditions ) {
+    method !read-path ( :$path, :%conditions ) {
         
         given $path.leaf-table.name {
             when 't1' {
@@ -59,9 +59,11 @@ $writer.write( $reader, c1 => 1 );
 
 my $got-file = 'out.sql'.IO.slurp;
 my $expected-file = q:to/END/;
+    BEGIN;
     INSERT INTO `s1`.`t1` ( `c1`, `c2` ) VALUES ( '1', UNHEX( '0001' ) );
     INSERT INTO `s1`.`t2` ( `c3`, `c4` ) VALUES ( '1', '😀' );
     INSERT INTO `s1`.`t2` ( `c3`, `c4` ) VALUES ( '1', NULL );
+    COMMIT;
     END
 
 is $got-file, $expected-file, 'File generated';
@@ -69,7 +71,7 @@ unlink 'out.sql';
 
 UpRooted::Writer::MySQLFile.new( :!use-schema-name ).write( $reader, c1 => 1 );
 $got-file = 'out.sql'.IO.slurp;
-ok $got-file.contains( 'INSERT INTO `t1`' ), 'Without Schema name';
+ok $got-file.contains( 'INSERT INTO `t1`' ), 'Without UpRooted::Schema name';
 unlink 'out.sql';
 
 UpRooted::Writer::MySQLFile.new( 

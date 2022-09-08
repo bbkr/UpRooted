@@ -8,7 +8,7 @@ UpRooted::Column
 
 =head1 DESCRIPTION
 
-Represents Column level of relational database.
+Represents column level of relational database.
 
 =head1 SYNOPSIS
 
@@ -28,7 +28,7 @@ has $.table is required;
 
 =head2 name
 
-Column name that will be third part of fully qualified naming convention C<schema.table.column>.
+Column name that will be third part of Fully Qualified Naming convention C<schema.table.column>.
 
 =end pod
 
@@ -78,10 +78,10 @@ has Int $.order;
 
 submethod TWEAK {
 
-	# if order is not provided use the one in which Columns are added
+	# if order is not provided use the one in which UpRooted::Columns are added
     $!order //= $!table.columns.elems + 1;
     
-    # register Column in Table
+    # register UpRooted::Column in UpRooted::Table
     $!table.add-column( self );
     
     $!type .= lc if defined $!type;

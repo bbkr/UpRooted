@@ -47,7 +47,7 @@ with $library.table( 'books' ) -> $table {
 
 Note that for `UpRooted::Column`:
 * Nullability is super important for proper `UpRooted::Tree` construction later.
-* You may provide original database type to help `Uprooted::Writer` make decision how to store data.
+* You may provide original database type to help `UpRooted::Writer` make decision how to store data.
 
 Connect `UpRooted::Table`s with `UpRooted::Relation`s:
 
@@ -77,7 +77,7 @@ Composition will die on slightest sign of inconsistency, for example requesting 
 
 # ADVANCED
 
-## Multi Column Relations
+## Multi column relations
 
 Just select multiple `UpRooted::Column`s from the same `UpRooted::Table` when defining `UpRooted::Relation`.
 
@@ -91,7 +91,7 @@ UpRooted::Relation.new(
 
 Arity must be the same.
 
-## Cross Schema Relations
+## Cross schema relations
 
-Just define two `UpRooted::Schema`s with `UpRooted::Table`s and `Uprooted::Column`s in them.
-Then connect `Uprooted::Table`s from different `UpRooted::Schema`s using `UpRooted::Relation`s.
+Just define two `UpRooted::Schema`s with `UpRooted::Table`s and `UpRooted::Column`s in them.
+Then connect `UpRooted::Table`s from different `UpRooted::Schema`s using `UpRooted::Relation`s.

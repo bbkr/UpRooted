@@ -8,7 +8,7 @@ UpRooted::Table
 
 =head1 DESCRIPTION
 
-Represents Table level of relational database.
+Represents table level of relational database.
 
 =head1 SYNOPSIS
 
@@ -28,7 +28,7 @@ has $.schema is required;
 
 =head2 name
 
-Table name that will be second part of fully qualified naming convention C<schema.table.column>.
+Table name that will be second part of Fully Qualified Naming convention C<schema.table.column>.
 
 =end pod
 
@@ -39,7 +39,7 @@ has %!children-relations;
 
 submethod TWEAK {
 
-	# register Table in Schema
+	# register UpRooted::Table in UpRooted::Schema
     $!schema.add-table( self );
 
 }
@@ -59,13 +59,13 @@ and you should NEVER call this method manually.
 
 method add-column ( $column! ) {
     
-    die sprintf 'Column %s is from different Table than %s.', $column.name, $.name
+    die sprintf 'UpRooted::Column %s is from different UpRooted::Table than %s.', $column.name, $.name
         unless $column.table === self;
         
-	die sprintf 'Column %s has order conflict in Table %s.', $column.name, $.name, 
+	die sprintf 'UpRooted::Column %s has order conflict in UpRooted::Table %s.', $column.name, $.name, 
 		if %!columns.values.grep: *.order == $column.order;
     
-    die sprintf 'Column %s ia already present in Table %s.', $column.name, $.name
+    die sprintf 'UpRooted::Column %s ia already present in UpRooted::Table %s.', $column.name, $.name
         if %!columns{ $column.name }:exists;
     
     %!columns{ $column.name } = $column;
@@ -81,7 +81,7 @@ Returns L<UpRooted::Column> of given C<$name>.
 
 method column ( Str:D $name! ) {
     
-    die sprintf 'Column %s is not present in Table %s.', $name, $.name
+    die sprintf 'UpRooted::Column %s is not present in UpRooted::Table %s.', $name, $.name
         unless %!columns{ $name }:exists;
     
     return %!columns{ $name };
@@ -126,12 +126,12 @@ and you should NEVER call this method manually.
 
 method add-child-relation( $relation! ) {
 
-    # Relation already checks if all Columns are from the same Table,
-    # no need to check consistency for individual Columns
-    die sprintf 'Relation %s is from different parent Table than %s.', $relation.name, $.name
+    # UpRooted::Relation already checks if all UpRooted::Columns are from the same UpRooted::Table,
+    # no need to check consistency for individual UpRooted::Columns
+    die sprintf 'UpRooted::Relation %s is from different parent UpRooted::Table than %s.', $relation.name, $.name
         unless $relation.parent-table === self;
     
-    die sprintf 'Relation %s ia already present in parent Table %s.', $relation.name, $.name
+    die sprintf 'UpRooted::Relation %s ia already present in parent UpRooted::Table %s.', $relation.name, $.name
         if %!children-relations{ $relation.name }:exists;
 
     %!children-relations{ $relation.name } = $relation;
@@ -148,7 +148,7 @@ Returns L<UpRooted::Relation> to child L<UpRooted::Table> of given C<$name>.
 
 method child-relation ( Str:D $name! ) {
     
-    die sprintf 'Relation %s is not present in Table %s.', $name, $.name
+    die sprintf 'UpRooted::Relation %s is not present in UpRooted::Table %s.', $name, $.name
         unless %!children-relations{ $name }:exists;
     
     return %!children-relations{ $name };

@@ -11,7 +11,7 @@ use UpRooted::Tree;
 
 plan 9;
 
-subtest 'path single node' => {
+subtest 'UpRooted::Path single node' => {
 
     plan 2;
     
@@ -21,13 +21,13 @@ subtest 'path single node' => {
     my $path;
     lives-ok {
         $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
-    }, 'Path created';
+    }, 'UpRooted::Path created';
     
-    is-deeply $path.relations, [], 'No Relations between root Table that is also leaf Table';
+    is-deeply $path.relations, [], 'No UpRooted::Relations between root UpRooted::Table that is also leaf UpRooted::Table';
     
 };
 
-subtest 'path without relations' => {
+subtest 'UpRooted::Path without relations' => {
 
     plan 1;
     
@@ -39,11 +39,11 @@ subtest 'path without relations' => {
     
     throws-like {
         $path.relations;
-    }, Exception, message => 'No Relations in Path between Table t1 and Table t2.', 'Path must have Relations between Tables.';
+    }, Exception, message => 'No UpRooted::Relations in UpRooted::Path between UpRooted::Table t1 and UpRooted::Table t2.', 'UpRooted::Path must have UpRooted::Relations between UpRooted::Tables.';
     
 };
 
-subtest 'path with inconsistent relations' => {
+subtest 'UpRooted::Path with inconsistent UpRooted::Relations' => {
 
     plan 3;
     
@@ -70,19 +70,19 @@ subtest 'path with inconsistent relations' => {
     
     throws-like {
         $path.analyze-relations( $schema.table( 't2' ).child-relation( 'r2' ) );
-    }, Exception, message => 'Relations root Table is different than t1.', 'Relations chain must start in root Table';
+    }, Exception, message => 'UpRooted::Relations root UpRooted::Table is different than t1.', 'UpRooted::Relations chain must start in root UpRooted::Table';
     
     throws-like {
         $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ), $schema.table( 't1' ).child-relation( 'r1' )  );
-    }, Exception, message => 'Parent Relation r1 and child Relation r1 are not referring to the same Table.', 'Relations chain must refer to consistent Tables';
+    }, Exception, message => 'Parent UpRooted::Relation r1 and child UpRooted::Relation r1 are not referring to the same UpRooted::Table.', 'UpRooted::Relations chain must refer to consistent UpRooted::Tables';
     
     throws-like {
         $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ) );
-    }, Exception, message => 'Relations leaf Table is different than t3.', 'Relations chain must end in leaf Table';
+    }, Exception, message => 'UpRooted::Relations leaf UpRooted::Table is different than t3.', 'UpRooted::Relations chain must end in leaf UpRooted::Table';
     
 };
 
-subtest 'path nullability' => {
+subtest 'UpRooted::Path nullability' => {
     
     plan 3;
     
@@ -106,19 +106,19 @@ subtest 'path nullability' => {
     );
 
     my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
-    ok !$path.is-nullable, 'Path between root Table that is also leaf Table is never nullable';
+    ok !$path.is-nullable, 'UpRooted::Path between root UpRooted::Table that is also leaf UpRooted::Table is never nullable';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ) );
-    ok !$path.is-nullable, 'Path has no nullable Relations';
+    ok !$path.is-nullable, 'UpRooted::Path has no nullable UpRooted::Relations';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $schema.table( 't1' ).child-relation( 'r1' ), $schema.table( 't2' ).child-relation( 'r2' ),  );
-    ok $path.is-nullable, 'Path has nullable Relations';
+    ok $path.is-nullable, 'UpRooted::Path has nullable UpRooted::Relations';
 
 };
 
-subtest 'path relations analyze' => {
+subtest 'UpRooted::Path relations analyze' => {
     
     plan 7;
     
@@ -168,41 +168,41 @@ subtest 'path relations analyze' => {
     
     my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     $path.analyze-relations( $relation_t1_t2_nullable );
-    is-deeply $path.relations, [ $relation_t1_t2_nullable ], 'Any Relation is better than none';
+    is-deeply $path.relations, [ $relation_t1_t2_nullable ], 'Any UpRooted::Relation is better than none';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $relation_t1_t2_nullable, $relation_t2_t3_nullable );
     $path.analyze-relations( $relation_t1_t3_nullable );
-    is-deeply $path.relations, [ $relation_t1_t3_nullable ], 'Shorter nullable Relations are better than longer nullable ones';
+    is-deeply $path.relations, [ $relation_t1_t3_nullable ], 'Shorter nullable UpRooted::Relations are better than longer nullable ones';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $relation_t1_t3_nullable );
     $path.analyze-relations( $relation_t1_t2_nullable, $relation_t2_t3_nullable );
-    is-deeply $path.relations, [ $relation_t1_t3_nullable ], 'Longer nullable Relations are not better than shorter nullable ones';
+    is-deeply $path.relations, [ $relation_t1_t3_nullable ], 'Longer nullable UpRooted::Relations are not better than shorter nullable ones';
 
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $relation_t1_t3_nullable );
     $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
-    is-deeply $path.relations, [ $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable ], 'Not nullable Relations are always better than nullable ones, regardless of length';
+    is-deeply $path.relations, [ $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable ], 'Not nullable UpRooted::Relations are always better than nullable ones, regardless of length';
 
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
     $path.analyze-relations( $relation_t1_t3_nullable );
-    is-deeply $path.relations, [ $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable ], 'Nullable Relations are always worse than not nullable ones, regardless of length';
+    is-deeply $path.relations, [ $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable ], 'Nullable UpRooted::Relations are always worse than not nullable ones, regardless of length';
 
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
     $path.analyze-relations( $relation_t1_t3_not_nullable );
-    is-deeply $path.relations, [ $relation_t1_t3_not_nullable ], 'Shorter not nullable Relations are better than longer not nullable ones';
+    is-deeply $path.relations, [ $relation_t1_t3_not_nullable ], 'Shorter not nullable UpRooted::Relations are better than longer not nullable ones';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $relation_t1_t3_not_nullable );
     $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
-    is-deeply $path.relations, [ $relation_t1_t3_not_nullable ], 'Longer not nullable Relations are not better than shorter not nullable ones';
+    is-deeply $path.relations, [ $relation_t1_t3_not_nullable ], 'Longer not nullable UpRooted::Relations are not better than shorter not nullable ones';
 
 };
 
-subtest 'path order' => {
+subtest 'UpRooted::Path order' => {
     
     plan 4;
     
@@ -230,23 +230,23 @@ subtest 'path order' => {
     );
     
     my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
-    is $path.order, 0, 'Order is 0 for root Table.';
+    is $path.order, 0, 'Order is 0 for root UpRooted::Table.';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     throws-like {
         $path.order;
-    }, Exception, message => 'No Relations in Path between Table t1 and Table t2.', 'Order cannot be determined without Relations between Tables.';
+    }, Exception, message => 'No UpRooted::Relations in UpRooted::Path between UpRooted::Table t1 and UpRooted::Table t2.', 'Order cannot be determined without UpRooted::Relations between UpRooted::Tables.';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
     $path.analyze-relations( $relation_t1_t2, $relation_t2_t3 );
-    is $path.order, 2, 'Order set to longest Relations';
+    is $path.order, 2, 'Order set to longest UpRooted::Relations';
     
     $path.analyze-relations( $relation_t1_t3 );
-    ok $path.order > $path.relations.elems, 'Order never decreases even if shorter Relations are found';
+    ok $path.order > $path.relations.elems, 'Order never decreases even if shorter UpRooted::Relations are found';
 
 };
 
-subtest 'path loops' => {
+subtest 'UpRooted::Path loops' => {
     
     plan 18;
     
@@ -282,41 +282,41 @@ subtest 'path loops' => {
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     throws-like {
         $path.looped;
-    }, Exception, message => 'No Relations in Path between Table t1 and Table t2.', 'Loop cannot be determined without Relations between Tables.';
+    }, Exception, message => 'No UpRooted::Relations in UpRooted::Path between UpRooted::Table t1 and UpRooted::Table t2.', 'Loop cannot be determined without UpRooted::Relations between UpRooted::Tables.';
 
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     throws-like {
         $path.analyze-relations( $relation_t1_t1, $relation_t1_t1, $relation_t1_t2 );
-    }, Exception, message => 'Table t1 seen twice before reaching leaf Table.', 'Loop detected along Relations before reaching leaf Table.';
+    }, Exception, message => 'UpRooted::Table t1 seen twice before reaching leaf UpRooted::Table.', 'Loop detected along UpRooted::Relations before reaching leaf UpRooted::Table.';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
     is $path.analyze-relations( $relation_t1_t1 ), False, 'Root loop circuit breaker triggered';
-    is $path.looped, True, 'Path marked as looped';
-    is-deeply $path.relations, [], 'Looped Path does not establish Relations';
+    is $path.looped, True, 'UpRooted::Path marked as looped';
+    is-deeply $path.relations, [], 'Looped UpRooted::Path does not establish UpRooted::Relations';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     is $path.analyze-relations( $relation_t1_t2, $relation_t2_t2 ), False, 'Short loop circuit breaker triggered';
-    is $path.looped, True, 'Path marked as looped';
+    is $path.looped, True, 'UpRooted::Path marked as looped';
     throws-like {
         $path.relations;
-    }, Exception, message => 'No Relations in Path between Table t1 and Table t2.', 'Looped Path does not establish Relations';
+    }, Exception, message => 'No UpRooted::Relations in UpRooted::Path between UpRooted::Table t1 and UpRooted::Table t2.', 'Looped UpRooted::Path does not establish UpRooted::Relations';
 
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
     is $path.analyze-relations( $relation_t1_t2, $relation_t2_t1 ), False, 'Long loop circuit breaker triggered';
-    is $path.looped, True, 'Path marked as looped';
-    is-deeply $path.relations, [], 'Looped Path does not establish Relations';
+    is $path.looped, True, 'UpRooted::Path marked as looped';
+    is-deeply $path.relations, [], 'Looped UpRooted::Path does not establish UpRooted::Relations';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     is $path.analyze-relations( $relation_t1_t2 ), True, 'No loop detected';
-    is $path.looped, False, 'Path is not marked as looped';
+    is $path.looped, False, 'UpRooted::Path is not marked as looped';
     is $path.analyze-relations( $relation_t1_t2, $relation_t2_t2 ), False, 'Loop circuit breaker triggered';
-    is $path.looped, True, 'Path marked as looped';
+    is $path.looped, True, 'UpRooted::Path marked as looped';
     is $path.analyze-relations( $relation_t1_t2 ), True, 'No loop detected';
-    is $path.looped, True, 'Path is still marked as looped';
+    is $path.looped, True, 'UpRooted::Path is still marked as looped';
     
 };
 
-# helper to convert Tree to Table names for easy testing
+# helper to convert UpRooted::Tree to UpRooted::Table names for easy testing
 sub path-to-tables ( $tree ) {
     my @path;
     
@@ -327,7 +327,7 @@ sub path-to-tables ( $tree ) {
     return @path;
 }
 
-subtest 'tree basics' => {
+subtest 'UpRooted::Tree basics' => {
     
     plan 4;
     
@@ -355,20 +355,20 @@ subtest 'tree basics' => {
     );
 
     my $tree = UpRooted::Tree.new( root-table => $schema.table( 't3' ) );
-    is-deeply path-to-tables( $tree ), [ [ 't3' ], ], 'Root table Path';
+    is-deeply path-to-tables( $tree ), [ [ 't3' ], ], 'Root table UpRooted::Path';
     
     $tree = UpRooted::Tree.new( root-table => $schema.table( 't2' ) );
-    is-deeply path-to-tables( $tree ), [ [ 't2' ], [ 't2', 't3' ] ], 'Linear Paths';
+    is-deeply path-to-tables( $tree ), [ [ 't2' ], [ 't2', 't3' ] ], 'Linear UpRooted::Paths';
     
     # both t2 and t3 may be reached in the best way from t1,
     # but t2 must be reached first as t3 depends on t2
     $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
-    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ], [ 't1', 't3' ] ], 'Diamond Paths';
-    ok [<]( $tree.paths.map: *.order ), 'Paths have correct order';
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ], [ 't1', 't3' ] ], 'Diamond UpRooted::Paths';
+    ok [<]( $tree.paths.map: *.order ), 'UpRooted::Paths have correct order';
     
 };
 
-subtest 'tree loops' => {
+subtest 'UpRooted::Tree loops' => {
     
     plan 3;
 
@@ -383,7 +383,7 @@ subtest 'tree loops' => {
 
     # loop is t1 -> t1
     my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
-    is-deeply path-to-tables( $tree ), [ [ 't1' ], ], 'Short looped Path';
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], ], 'Short looped UpRooted::Path';
 
     $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
@@ -403,7 +403,7 @@ subtest 'tree loops' => {
 
     # loop is t1 -> t2 -> t1
     $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
-    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ] ], 'Long looped Path';
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ] ], 'Long looped UpRooted::Path';
 
     $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
@@ -428,8 +428,8 @@ subtest 'tree loops' => {
         name => 'r3'
     );
 
-    # longest Path is t1 -> t2 -> t3, but loop is t2 -> t2
+    # longest UpRooted::Path is t1 -> t2 -> t3, but loop is t2 -> t2
     $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
-    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ], [ 't1', 't2', 't3' ] ], 'Inter looped Path';
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ], [ 't1', 't2', 't3' ] ], 'Inter looped UpRooted::Path';
 
 };

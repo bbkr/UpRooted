@@ -72,7 +72,7 @@ Available variants:
 * `UpRooted::Reader::MySQL`
 * `UpRooted::Reader::PostgreSQL` (work in progress)
 
-Creating `UpRooted::Reader` must be done only once per `Uprooted::Tree`.
+Creating `UpRooted::Reader` must be done only once per `UpRooted::Tree`.
 
 ### UpRooted::Writer
 
@@ -95,7 +95,7 @@ Note that not every `UpRooted::Writer` can save every data type provided by `UpR
 
 ## CACHING
 
-Creating instances of modules mentioned above are hevay operations, especially on large schemas. You can reuse all of them for great speed improvement.
+Creating instances of modules mentioned above are heavy operations, especially on large schemas. You can reuse all of them for great speed improvement.
 
 For example if you need to save multiple users you need to create `UpRooted::Schema`, `UpRooted::Tree`, `UpRooted::Reader` and `UpRooted::Writer` only once.
 
@@ -105,7 +105,7 @@ my $tree = ...;
 my $reader = ...;
 my $writer = UpRooted::Writer::MySQLFile.new(
     # name generator to avoid file name conflicts
-    file-nameing => sub ( $tree, %conditions ) {
+    file-naming => sub ( $tree, %conditions ) {
         %conditions{ 'id' } ~ '.sql'
     }
 );

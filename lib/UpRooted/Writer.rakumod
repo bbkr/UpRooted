@@ -18,22 +18,12 @@ Requires specific implementation for given output type.
 
     my $writer = UpRooted::Writer.new( );
     $writer.write( :$reader, id => 1 );
+
+If you need to write to schema of different name
+you can skip original L<UpRooted::Schema> name in Fully Qualified Names by setting:
+
+    my $writer = UpRooted::Writer.new( :!use-schema-name );
     
-=head1 ATTRIBUTES
-
-=head2 use-schema-name
-
-Do not use L<UpRooted::Schema> name in output.
-Useful if data is migrated from one schema to another.
-
-Default is C<True>.
-
-=end pod
-
-has $.use-schema-name = True;
-
-=begin pod
-
 =head1 METHODS
 
 =head2 write
@@ -76,7 +66,7 @@ method write ( $reader, *%conditions ) {
 
         if $_ ~~ UpRooted::Table {
             
-            # flush only when next Table is gathered
+            # flush only when next UpRooted::Table is gathered
             self!write-flush( ) if $had-table;
             $had-table = True;
             

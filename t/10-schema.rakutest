@@ -9,17 +9,17 @@ use UpRooted::Relation;
 
 plan 4;
 
-subtest 'schema' => {
+subtest 'UpRooted::Schema' => {
 
     plan 1;
     
     lives-ok {
         UpRooted::Schema.new( name => 's1' );
-    }, 'Schema created';
+    }, 'UpRooted::Schema created';
 
 };
 
-subtest 'table' => {
+subtest 'UpRooted::Table' => {
 
     plan 6;
 
@@ -27,31 +27,31 @@ subtest 'table' => {
     
     throws-like {
         $schema.table( 't1' );
-    }, Exception, message => 'Table t1 is not present in Schema s1.', 'Table is not present in Schema';
+    }, Exception, message => 'UpRooted::Table t1 is not present in UpRooted::Schema s1.', 'UpRooted::Table is not present in UpRooted::Schema';
     
     lives-ok {
         UpRooted::Table.new( :$schema, name => 't1' );
-    }, 'Table created';
+    }, 'UpRooted::Table created';
 
-    ok $schema.table( 't1' ):defined, 'Table is present in Schema';
+    ok $schema.table( 't1' ):defined, 'UpRooted::Table is present in UpRooted::Schema';
     
     throws-like {
         UpRooted::Table.new( :$schema, name => 't1' );
-    }, Exception, message => 'Table t1 ia already present in Schema s1.', 'Table is already present in Schema';
+    }, Exception, message => 'UpRooted::Table t1 ia already present in UpRooted::Schema s1.', 'UpRooted::Table is already present in UpRooted::Schema';
     
     throws-like {
         $schema.add-table(
             UpRooted::Table.new( schema => UpRooted::Schema.new( name => 's2' ), name => 't2' )
         )
-    }, Exception, message => 'Table t2 is from different Schema than s1.', 'Table is from different Schema';
+    }, Exception, message => 'UpRooted::Table t2 is from different UpRooted::Schema than s1.', 'UpRooted::Table is from different UpRooted::Schema';
 
     UpRooted::Table.new( :$schema, name => 't3' );
     UpRooted::Table.new( :$schema, name => 't2' );
-    is-deeply $schema.tables.map( { .name } ), ( 't1', 't2', 't3' ), 'All Tables in alphabetical order';
+    is-deeply $schema.tables.map( { .name } ), ( 't1', 't2', 't3' ), 'All UpRooted::Tables in alphabetical order';
 
 }
 
-subtest 'column' => {
+subtest 'UpRooted::Column' => {
     
     plan 11;
 
@@ -60,44 +60,44 @@ subtest 'column' => {
     
     throws-like {
         $schema.table( 't1' ).column( 'c1' );
-    }, Exception, message => 'Column c1 is not present in Table t1.', 'Column is not present in Table';
+    }, Exception, message => 'UpRooted::Column c1 is not present in UpRooted::Table t1.', 'UpRooted::Column is not present in UpRooted::Table';
 
     lives-ok {
         UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', type => 'tEXt', :!is-nullable );
-    }, 'Column created';
+    }, 'UpRooted::Column created';
     
-    ok $schema.table( 't1' ).column( 'c1' ):defined, 'Column is present in Table';
+    ok $schema.table( 't1' ).column( 'c1' ):defined, 'UpRooted::Column is present in UpRooted::Table';
     
-    is $schema.table( 't1' ).column( 'c1' ).type, 'text', 'Column has known type which was lowercased';
+    is $schema.table( 't1' ).column( 'c1' ).type, 'text', 'UpRooted::Column has known type which was lowercased';
     
-    is $schema.table( 't1' ).column( 'c1' ).order, 1, 'Automatic Column order set';
+    is $schema.table( 't1' ).column( 'c1' ).order, 1, 'Automatic UpRooted::Column order set';
     
     throws-like {
         UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
-    }, Exception, message => 'Column c1 ia already present in Table t1.', 'Column is already present in Table';
+    }, Exception, message => 'UpRooted::Column c1 ia already present in UpRooted::Table t1.', 'UpRooted::Column is already present in UpRooted::Table';
 
     throws-like {
         $schema.table( 't1' ).add-column(
             UpRooted::Column.new( table => UpRooted::Table.new( :$schema, name => 't2' ), name => 'c2', :is-nullable )
         );
-    }, Exception, message => 'Column c2 is from different Table than t1.', 'Column is from different Table';
+    }, Exception, message => 'UpRooted::Column c2 is from different UpRooted::Table than t1.', 'UpRooted::Column is from different UpRooted::Table';
 
     UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c3', :!is-nullable, order => 3 );
     
-    nok $schema.table( 't1' ).column( 'c3' ).type.defined, 'Column has not known type';
+    nok $schema.table( 't1' ).column( 'c3' ).type.defined, 'UpRooted::Column has not known type';
     
     UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :!is-nullable, order => 2 );
-    is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'c1', 'c2', 'c3' ), 'All Columns in definition order';
+    is-deeply $schema.table( 't1' ).columns.map( { .name } ), ( 'c1', 'c2', 'c3' ), 'All UpRooted::Columns in definition order';
     
-    is-deeply $schema.table( 't1' ).columns( 'c3', 'c1' ).map( { .name } ), ( 'c3', 'c1' ), 'Subset of Columns in requested order';
+    is-deeply $schema.table( 't1' ).columns( 'c3', 'c1' ).map( { .name } ), ( 'c3', 'c1' ), 'Subset of UpRooted::Columns in requested order';
 
     throws-like {
         UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c4', :!is-nullable, order => 1 );
-    }, Exception, message => 'Column c4 has order conflict in Table t1.', 'Column has order conflict in Table';
+    }, Exception, message => 'UpRooted::Column c4 has order conflict in UpRooted::Table t1.', 'UpRooted::Column has order conflict in UpRooted::Table';
 
 }
 
-subtest 'relation' => {
+subtest 'UpRooted::::Relation' => {
     
     plan 14;
 
@@ -111,7 +111,7 @@ subtest 'relation' => {
 
     throws-like {
         $schema.table( 't1' ).child-relation( 'r1' );
-    }, Exception, message => 'Relation r1 is not present in Table t1.', 'Relation is not present in Table';
+    }, Exception, message => 'UpRooted::Relation r1 is not present in UpRooted::Table t1.', 'UpRooted::Relation is not present in UpRooted::Table';
     
     lives-ok {
         UpRooted::Relation.new(
@@ -119,14 +119,14 @@ subtest 'relation' => {
             child-columns => $schema.table( 't2' ).columns( 'c3' ),
             name => 'r1'
         );
-    }, 'Relation on single column created';
+    }, 'UpRooted::Relation on single UpRooted::Column created';
     
-    ok $schema.table( 't1' ).child-relation( 'r1' ):defined, 'Relation is present in Table';
+    ok $schema.table( 't1' ).child-relation( 'r1' ):defined, 'UpRooted::Relation is present in UpRooted::Table';
     
     with $schema.table( 't1' ).child-relation( 'r1' ) {
-        is .parent-table, $schema.table( 't1' ), 'Relation knows parent Table from Columns.';
-        is .child-table, $schema.table( 't2' ), 'Relation knows child Table from Columns.';
-        nok .is-nullable, 'Relation is not nullable.';
+        is .parent-table, $schema.table( 't1' ), 'UpRooted::Relation knows parent UpRooted::Table from UpRooted::Columns.';
+        is .child-table, $schema.table( 't2' ), 'UpRooted::Relation knows child UpRooted::Table from UpRooted::Columns.';
+        nok .is-nullable, 'UpRooted::Relation is not nullable.';
     }
     
     throws-like {
@@ -135,7 +135,7 @@ subtest 'relation' => {
             child-columns => $schema.table( 't2' ).columns( 'c3' ),
             name => 'r1'
         );
-    }, Exception, message => 'Relation r1 ia already present in parent Table t1.', 'Column count for parent and child Table is different';
+    }, Exception, message => 'UpRooted::Relation r1 ia already present in parent UpRooted::Table t1.', 'UpRooted::Relation is already present in UpRooted::Table';
     
     lives-ok {
         UpRooted::Relation.new(
@@ -143,11 +143,11 @@ subtest 'relation' => {
             child-columns => $schema.table( 't2' ).columns( 'c3', 'c4' ),
             name => 'r2'
         );
-    }, 'Relation on multiple columns created';
+    }, 'UpRooted::Relation on multiple UpRooted::Columns created';
     
-    ok $schema.table( 't1' ).child-relation( 'r2' ).is-nullable, 'Relation is nullable.';
+    ok $schema.table( 't1' ).child-relation( 'r2' ).is-nullable, 'UpRooted::Relation is nullable.';
     
-    is-deeply $schema.table( 't1' ).children-relations.map( { .name } ), ( 'r1', 'r2' ), 'All Relations to child Tables in name order';
+    is-deeply $schema.table( 't1' ).children-relations.map( { .name } ), ( 'r1', 'r2' ), 'All UpRooted::Relations to child UpRooted::Tables in name order';
     
     throws-like {
         UpRooted::Relation.new(
@@ -155,7 +155,7 @@ subtest 'relation' => {
             child-columns => $schema.table( 't2' ).columns( 'c3', 'c4' ),
             name => 'r3'
         );
-    }, Exception, message => 'Parent and child Columns count different in Relation r3.', 'Column count for parent and child Table is different';
+    }, Exception, message => 'Parent and child UpRooted::Columns count different in UpRooted::Relation r3.', 'UpRooted::Column count for parent and child UpRooted::Table is different';
     
     throws-like {
         UpRooted::Relation.new(
@@ -163,7 +163,7 @@ subtest 'relation' => {
             child-columns => $schema.table( 't2' ).columns( 'c3', 'c4' ),
             name => 'r3'
         );
-    }, Exception, message => 'Parent Columns must be from the same Table in Relation r3.', 'Columns from two different parent Tables';
+    }, Exception, message => 'Parent UpRooted::Columns must be from the same UpRooted::Table in UpRooted::Relation r3.', 'UpRooted::Columns from two different parent UpRooted::Tables';
     
     throws-like {
         UpRooted::Relation.new(
@@ -171,7 +171,7 @@ subtest 'relation' => {
             child-columns => [ $schema.table( 't1' ).column( 'c1' ), $schema.table( 't2' ).column( 'c3' ) ],
             name => 'r3'
         );
-    }, Exception, message => 'Child Columns must be from the same Table in Relation r3.', 'Columns from two different child Tables';
+    }, Exception, message => 'Child UpRooted::Columns must be from the same UpRooted::Table in UpRooted::Relation r3.', 'UpRooted::Columns from two different child UpRooted::Tables';
     
     throws-like {
         $schema.table( 't1' ).add-child-relation(
@@ -181,6 +181,6 @@ subtest 'relation' => {
                 name => 'r3'
             )
         );
-    }, Exception, message => 'Relation r3 is from different parent Table than t1.', 'Relation is from different parent Table';
+    }, Exception, message => 'UpRooted::Relation r3 is from different parent UpRooted::Table than t1.', 'UpRooted::Relation is from different parent UpRooted::Table';
 
 }

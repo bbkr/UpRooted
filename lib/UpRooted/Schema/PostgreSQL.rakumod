@@ -1,9 +1,7 @@
 use UpRooted::Schema;
-use UpRooted::Table;
-use UpRooted::Column;
-use UpRooted::Relation;
+use UpRooted::Schema::Helper::Information;
 
-unit class UpRooted::Schema::PostgreSQL is UpRooted::Schema;
+unit class UpRooted::Schema::PostgreSQL does UpRooted::Schema does UpRooted::Schema::Helper::Information;
 
 =begin pod
 
@@ -49,8 +47,8 @@ Consider following examples:
         FOREIGN KEY ( "foo_id" ) REFERENCES "foo" ( "id" )
     );
 
-This is constraint that uses underlying unique index.
-Relations depending on constraint will be discovered as expected.
+This PRIMARY KEY is constraint that uses underlying unique index.
+FOREIGN KEY relations depending on this constraint will be discovered as expected.
 
     CREATE TABLE "foo" (
         "id" int,
@@ -61,8 +59,8 @@ Relations depending on constraint will be discovered as expected.
         FOREIGN KEY ( "foo_id" ) REFERENCES "foo" ( "id" )
     );
 
-This is also constraint that uses underlying unique index.
-Relations depending on constraint will be discovered as expected.
+This UNIQUE is also constraint that uses underlying unique index.
+FOREIGN KEY relations depending on this constraint will be discovered as expected.
 
     CREATE TABLE "foo" (
         "id" int
@@ -73,11 +71,11 @@ Relations depending on constraint will be discovered as expected.
         FOREIGN KEY ( "foo_id" ) REFERENCES "foo" ( "id" )
     );
 
-This is just unique index.
+This is just unique INDEX.
 It will work as expected from data storage / consistency point of view
-but relations depending on index will not be discovered as expected.
+but FOREIGN KEY relations depending on it will not be discovered as expected.
 
-This is because L<UpRooted::Schema::PostgreSQL> uses on Information Schema
+This is because L<UpRooted::Schema::PostgreSQL> uses Information Schema
 which contains information which unique constraint will be used during foreign key check
 but does not contain information which underlying unique index will be used.
 
@@ -95,58 +93,35 @@ Worth reading: L<https://stackoverflow.com/questions/61249732/null-values-for-re
 
 =end pod
 
-method new ( :$connection! ) {
+submethod BUILD ( :$connection! ) {
     
-    state $select-schema = q{
+    state $query-schemata = q{
         SELECT current_database( ) AS name
     };
     
-    my $schema = self.bless( name => self!fetch-array-of-hashes( $connection, $select-schema )[ 0 ]{ 'name' } );
-    
-    state $select-tables = q{
+    state $query-tables = q{
         SELECT "table_name" AS "name"
         FROM "information_schema"."tables"
         WHERE "table_catalog" = CURRENT_DATABASE( )
             AND "table_schema" = CURRENT_SCHEMA( )  -- exclude system tables
             AND "table_type" = 'BASE TABLE'         -- exclude views
     };
-    for self!fetch-array-of-hashes( $connection, $select-tables ) -> %table {
-        UpRooted::Table.new(
-            :$schema,
-            name => %table{ 'name' }
-        );
-    }
 
-    state $select-columns = qq{
+    state $query-columns = qq{
         SELECT "column_name" AS "name", "table_name",
             CASE "is_nullable" WHEN 'YES' THEN TRUE ELSE FALSE END AS "is_nullable",
             "data_type" AS "type", "ordinal_position" AS "order"
         FROM "information_schema"."columns"
         WHERE "table_catalog" = CURRENT_DATABASE( )
             AND "table_schema" = CURRENT_SCHEMA( )
-            AND "table_name" IN ( $select-tables )  -- exclude columns from views
+            AND "table_name" IN ( $query-tables )  -- exclude columns from views
         ORDER BY "table_name"
     };
-    for self!fetch-array-of-hashes( $connection, $select-columns ).classify( *{ 'table_name' } ).kv -> $table_name, @columns {
-
-        my $table := $schema.table( $table_name );
-
-        for @columns -> %column {
-
-            UpRooted::Column.new(
-                :$table,
-                name => %column{ 'name' },
-                type => %column{ 'type' }.lc,
-                is-nullable => %column{ 'is_nullable' },
-                order => %column{ 'order' }
-            );
-        }
-    }
 
     # we do not care if foreign key constraint is defined in catalog named differently than table catalog
     # as long as it finally matches table from current table catalog to another table from current table catalog,
     # in other words we do not enforce: "rc"."constraint_catalog" = "kcup"."table_catalog" = "kcuc"."table_catalog"
-    state $select-relations = q{
+    state $query-relations = q{
         SELECT rc."constraint_name" AS name,
             "kcup"."table_name" AS "parent_table_name", "kcup"."column_name" AS "parent_column_name",
             "kcuc"."table_name" AS "child_table_name", "kcuc"."column_name" AS "child_column_name"
@@ -165,30 +140,7 @@ method new ( :$connection! ) {
             AND "kcuc"."table_schema" = CURRENT_SCHEMA( )
         ORDER BY "rc"."constraint_name", "kcuc"."position_in_unique_constraint"
     };
-    for self!fetch-array-of-hashes( $connection, $select-relations ).classify( *{ 'name' } ).kv -> $relation_name, @columns {
-
-        # it is impossible in PostgreSQL to have foreign key of given name referencing two different Tables
-        # so it is safe to take parent and child Table names from first Column set
-        my $parent-table := $schema.table( @columns.first{ 'parent_table_name' } );
-        my $child-table := $schema.table( @columns.first{ 'child_table_name' } );
-
-        UpRooted::Relation.new(
-            parent-columns => $parent-table.columns( @columns.map: *{ 'parent_column_name' } ),
-            child-columns => $child-table.columns( @columns.map: *{ 'child_column_name' } ),
-            name => $relation_name
-        );
-
-    }
     
-    return $schema;
+    $!name = self!discover( :$connection, :$query-schemata, :$query-tables, :$query-columns, :$query-relations );
+    
 }
-
-method !fetch-array-of-hashes ( $connection, Str:D $query, *@params ) {
-    
-    my $statement = $connection.execute( $query, |@params );
-    my @data = $statement.allrows( :array-of-hash );
-    $statement.dispose( );
-    
-    return @data;
-}
-

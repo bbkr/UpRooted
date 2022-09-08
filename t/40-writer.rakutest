@@ -44,7 +44,7 @@ class UpRooted::Writer::Dummy does UpRooted::Writer {
 
 class UpRooted::Reader::Dummy does UpRooted::Reader {
 
-    method !read-path ( $path, %conditions ) {
+    method !read-path ( :$path, :%conditions ) {
         
         given $path.leaf-table.name {
             when 't1' {
@@ -77,13 +77,13 @@ my $writer = UpRooted::Writer::Dummy.new;
 
 $writer.write( $reader, c1 => 1 );
 
-isa-ok @written.shift, UpRooted::Tree, 'Tree passed to write start';
-is-deeply @written.shift, { 'c1' => 1 }, 'Conditions passed to write start';
-is @written.shift, $schema.table( 't1' ), 'Root table passed to write table';
-is-deeply @written.shift, [ 1, 1 ], 'Row from root Table passed to write row';
-is @written.shift, 'flush', 'Flush called after last row of root Table';
-is @written.shift, $schema.table( 't2' ), 'Leaf table passed to write table';
-is-deeply @written.shift, [ 1, 2 ], 'Row from leaf Table passed to write row';
-is-deeply @written.shift, [ 1, 3 ], 'Row from leaf Table passed to write row';
-is @written.shift, 'flush', 'Flush called after last row of leaf Table';
+isa-ok @written.shift, UpRooted::Tree, 'UpRooted::Tree passed to write start';
+is-deeply @written.shift, { 'c1' => 1 }, 'UpRooted::Conditions passed to write start';
+is @written.shift, $schema.table( 't1' ), 'UpRooted::Root table passed to write table';
+is-deeply @written.shift, [ 1, 1 ], 'UpRooted::Row from root UpRooted::Table passed to write row';
+is @written.shift, 'flush', 'Flush called after last row of root UpRooted::Table';
+is @written.shift, $schema.table( 't2' ), 'Leaf UpRooted::Table passed to write table';
+is-deeply @written.shift, [ 1, 2 ], 'Row from leaf UpRooted::Table passed to write row';
+is-deeply @written.shift, [ 1, 3 ], 'Row from leaf UpRooted::Table passed to write row';
+is @written.shift, 'flush', 'Flush called after last row of leaf UpRooted::Table';
 is @written.shift, 'end', 'Write end';

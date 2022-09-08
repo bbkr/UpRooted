@@ -18,7 +18,7 @@ Requires specific implementation for given database type.
 
     for gather $reader.read( id => 1 ) {
         if $_ ~~ UpRooted::Table {
-            say 'In Table ' ~ .name;
+            say 'In table ' ~ .name;
         }
         else {
             say 'there is row ' ~ $_;
@@ -49,27 +49,24 @@ Conditions must have defined values and C<=> operator will be used to evaluate t
 
 This sequence can be C<gather>ed by L<UpRooted::Writer>.
 
-Specific L<UpRooted::Reader> must implement following private methods:
-
-Method C<read-path( UpRooted::Path, %conditions )>.
-Instruction how to reach data in leaf L<UpRooted::Table>
-starting at rown in root L<UpRooted::Table> described by conditions.
+Specific L<UpRooted::Reader> must implement private method C<read-path( path => UpRooted::Path, :%conditions )>.
+It must convert L<UpRooted::Path> to data rows that can be collected by C<gather>.
 
 =end pod
 
 method read ( *%conditions ) {
     
-    # conditions must match Columns in root Table
+    # conditions must match UpRooted::Columns in root UpRooted::Table
     sink $.tree.root-table.column( $_ ) for %conditions.keys;
     
-    # all Paths will be returned in order that satisfies parent-child Tables dependencies
+    # all UpRooted::Paths will be returned in order that satisfies parent-child UpRooted::Tables dependencies
     for $.tree.paths -> $path {
         
-        # take Table so that Writer will know how to handle rows that will follow
+        # take UpRooted::Table so that UpRooted::Writer will know how to handle rows that will follow
         take $path.leaf-table;
         
-        # pass Path to specific implementation, it should take each row
-        self!read-path( $path, %conditions );
+        # pass UpRooted::Path to specific implementation, it should take each row
+        self!read-path( :$path, :%conditions );
     }
 
 }
