@@ -66,7 +66,7 @@ method read ( *%conditions ) {
         take $path.leaf-table;
         
         # pass UpRooted::Path to specific implementation, it should take each row
-        self!read-path( :$path, :%conditions );
+        self!read-path( $path, %conditions );
     }
 
 }

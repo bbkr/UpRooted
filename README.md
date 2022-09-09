@@ -33,7 +33,7 @@ my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
 use UpRooted::Writer::MySQLFile;
 my $writer = UpRooted::Writer::MySQLFile.new( :!use-schema-name );
     
-$writer.write( :$reader, id => 1 );
+$writer.write( $reader, id => 1 );
 ```
 
 Your user will be saved as `out.sql` file.

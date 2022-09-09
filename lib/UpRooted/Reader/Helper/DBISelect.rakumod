@@ -22,7 +22,7 @@ Converts L<UpRooted::Path> to query, executes it and produces rows that can be c
 
 =end pod
 
-method !read-path ( :$path, :%conditions ) {
+method !read-path ( $path, %conditions ) {
     
     # get list of UpRooted::Column names from leaf UpRooted::Table
     my $query-select = 'SELECT ';

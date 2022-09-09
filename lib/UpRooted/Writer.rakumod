@@ -17,7 +17,7 @@ Requires specific implementation for given output type.
 =head1 SYNOPSIS
 
     my $writer = UpRooted::Writer.new( );
-    $writer.write( :$reader, id => 1 );
+    $writer.write( $reader, id => 1 );
 
 If you need to write to schema of different name
 you can skip original L<UpRooted::Schema> name in Fully Qualified Names by setting:
@@ -44,7 +44,7 @@ for example preparing query templates.
 This method is always called for each L<UpRooted::Table> even if no rows will be returned.
 It is up to specific L<UpRooted::Writer> implementation to decide what to do with empty L<UpRooted::Table>s.
 
-Method C<write-data( @columns )> is called when new row is read.
+Method C<write-row( @values )> is called when new row is read.
 Order of columns is the same as L<UpRooted::Column>s in L<UpRooted::Table>.
 
 Method C<write-flush( )> is called when there will be no more data for current L<UpRooted::Table>
