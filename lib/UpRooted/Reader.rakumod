@@ -49,9 +49,6 @@ Conditions must have defined values and C<=> operator will be used to evaluate t
 
 This sequence can be C<gather>ed by L<UpRooted::Writer>.
 
-Specific L<UpRooted::Reader> must implement private method C<read-path( path => UpRooted::Path, :%conditions )>.
-It must convert L<UpRooted::Path> to data rows that can be collected by C<gather>.
-
 =end pod
 
 method read ( *%conditions ) {
@@ -70,3 +67,15 @@ method read ( *%conditions ) {
     }
 
 }
+
+=begin pod
+
+=head2 !read-path
+
+Specific L<UpRooted::Reader> must implement this method.
+It must convert L<UpRooted::Path> starting at root L<UpRooted::Table> with given C<%conditions>
+to data rows that can be collected by C<gather>.
+
+=end pod
+
+method !read-path ( $path, %conditions ) { !!! };

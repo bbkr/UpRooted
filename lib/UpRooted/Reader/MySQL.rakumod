@@ -1,8 +1,7 @@
 use UpRooted::Reader;
 use UpRooted::Reader::Helper::DBISelect;
-use UpRooted::Helper::DBIConnection;
 
-unit class UpRooted::Reader::MySQL does UpRooted::Reader does UpRooted::Reader::Helper::DBISelect does UpRooted::Helper::DBIConnection;;
+unit class UpRooted::Reader::MySQL does UpRooted::Reader does UpRooted::Reader::Helper::DBISelect;
 
 =begin pod
 
