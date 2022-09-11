@@ -37,3 +37,18 @@ method !quote-identifier ( Str:D $id! ) {
     
     return $.connection.quote( $id, :as-id );
 }
+
+=begin pod
+
+=head2 !quote-constant
+
+Provides quotinq of database constants by current database driver.
+
+Optional type is ignored at this level.
+
+=end pod
+
+method !quote-constant ( $constant!, $type ) {
+    
+    return $.connection.quote( $constant );
+}

@@ -10,6 +10,8 @@
     "provides": {
         "UpRooted::Column" : "lib/UpRooted/Column.rakumod",
         "UpRooted::Helper::DBIConnection" : "lib/UpRooted/Helper/DBIConnection.rakumod",
+        "UpRooted::Helper::FQN" : "lib/UpRooted/Helper/FQN.rakumod",
+        "UpRooted::Helper::Quoter" : "lib/UpRooted/Helper/Quoter.rakumod",
         "UpRooted::Path" : "lib/UpRooted/Path.rakumod",
         "UpRooted::Reader::Helper::DBISelect" : "lib/UpRooted/Reader/Helper/DBISelect.rakumod",
         "UpRooted::Reader::MySQL" : "lib/UpRooted/Reader/MySQL.rakumod",

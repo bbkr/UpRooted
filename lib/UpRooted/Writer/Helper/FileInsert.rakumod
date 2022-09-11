@@ -54,8 +54,7 @@ method !write-row ( @row ) {
     my @query-values;
     for @row.kv -> $index, $value {
         my $type := %!sql-cache{ 'column-types' }[ $index ];
-        my $is-binary = $type.defined && $type.ends-with( 'blob' );
-        @query-values.push: self!quote-constant( $value, :$is-binary );
+        @query-values.push: self!quote-value( $value, $type );
     }
     
     my $query-values = '( ' ~ @query-values.join( ', ' )  ~ ' )';

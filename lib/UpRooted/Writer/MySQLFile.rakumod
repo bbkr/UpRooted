@@ -63,13 +63,14 @@ method !quote-identifier ( Str:D $id! ) {
     return '`' ~ $!driver.escape( $id ) ~ '`';
 }
 
-method !quote-constant ( $value, Bool :$is-binary = False ) {
+method !quote-constant ( $value!, $type ) {
 
     return 'NULL' unless $value.defined;
     
     # emulate mysqldump --hex-blob flag,
     # this is so far the safest way to store and load binary in MySQL
-    return 'UNHEX( \'' ~ $!driver.escape( $value, :bin ) ~ '\' )' if $is-binary;
+    return 'UNHEX( \'' ~ $!driver.escape( $value, :bin ) ~ '\' )'
+        if $type.defined && $type.ends-with( 'blob' );
     
     given $value {
         when Buf {
