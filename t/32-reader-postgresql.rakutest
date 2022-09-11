@@ -1,0 +1,71 @@
+use lib 'lib';
+use lib 't/lib';
+
+use Test;
+
+use DBITest;
+use UpRooted::Schema::PostgreSQL;
+use UpRooted::Tree;
+use UpRooted::Reader::PostgreSQL;
+
+my $connection = connect( 'postgresql' );
+load( $connection, 'postgresql', 'cleanup.sql' );
+load( $connection, 'postgresql', 'schema.sql' );
+
+plan 2;
+
+my $schema = UpRooted::Schema::PostgreSQL.new( :$connection );
+my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+my $reader = UpRooted::Reader::PostgreSQL.new( :$connection, :$tree );
+
+subtest 'No data' => {
+
+    plan 1;
+
+    my @result = gather $reader.read( );
+    ok all( @result ) ~~ UpRooted::Table, 'Empty UpRooted::Tables';
+    
+};
+
+subtest 'With data' => {
+
+    plan 19;
+
+    load( $connection, 'postgresql', 'data.sql' );
+
+    my @result = gather $reader.read( id => 1 );
+    
+    is @result.shift.name, 't1', 'Root UpRooted::Table';
+    is-deeply @result.shift, [
+        1, 'a', '😀😔', 'a', -1, 1, 9223372036854775807, 1.1, -0.3e0, 0.3e0, Buf.new( 0x00 ), Bool::True, Array[Int].new( 1, 2, 3 )
+    ], 'Root data';
+
+    # also confirms if no data from UpRooted::Tree starting at id = 2 leaked
+    is @result.shift.name, 't2', 'UpRooted::Table with not nullable UpRooted::Relation with single UpRooted::Column';
+    is-deeply @result.shift, [ 1, 1 ], 'Row data';
+    is-deeply @result.shift, [ 2, 1 ], 'Row data';
+        
+    is @result.shift.name, 't6', 'Self loop UpRooted::Table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
+    
+    is @result.shift.name, 't9', 'Horse riddle UpRooted::Table';
+    # TODO, behavior not decided yet 
+    
+    is @result.shift.name, 't3', 'UpRooted::Table with not nullable UpRooted::Relations of different lengths.';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
+    is-deeply @result.shift, [ 2, 1, 2 ], 'Row data';
+    
+    is @result.shift.name, 't4', 'UpRooted::Table with not nullable UpRooted::Relation longer than nullable one';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
+    
+    is @result.shift.name, 't7', 'Long loop UpRooted::Table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
+    is @result.shift.name, 't8', 'Long loop UpRooted::Table';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
+
+    is @result.shift.name, 't5', 'UpRooted::Table with UpRooted::Relation with multiple UpRooted::Columns';
+    is-deeply @result.shift, [ 1, 1, 1 ], 'Row data';
+    
+};
+
+load( $connection, 'postgresql', 'cleanup.sql' );
