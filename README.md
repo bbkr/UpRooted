@@ -70,7 +70,7 @@ Creating `UpRooted::Tree` must be done only once per root `UpRooted::Table`.
 Available variants:
 
 * `UpRooted::Reader::MySQL`
-* `UpRooted::Reader::PostgreSQL` (work in progress)
+* `UpRooted::Reader::PostgreSQL`
 
 Creating `UpRooted::Reader` must be done only once per `UpRooted::Tree`.
 
