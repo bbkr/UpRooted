@@ -93,7 +93,7 @@ Worth reading: L<https://stackoverflow.com/questions/61249732/null-values-for-re
 
 =end pod
 
-submethod BUILD ( :$connection! ) {
+submethod BUILD ( :$!connection! ) {
     
     state $query-schemata = q{
         SELECT current_database( ) AS name
@@ -141,6 +141,6 @@ submethod BUILD ( :$connection! ) {
         ORDER BY "rc"."constraint_name", "kcuc"."position_in_unique_constraint"
     };
     
-    $!name = self!discover( :$connection, :$query-schemata, :$query-tables, :$query-columns, :$query-relations );
+    $!name = self!discover( :$query-schemata, :$query-tables, :$query-columns, :$query-relations );
     
 }

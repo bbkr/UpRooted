@@ -42,7 +42,7 @@ Always preserve cases of original names.
 
 =end pod
 
-submethod BUILD ( :$connection! ) {
+submethod BUILD ( :$!connection! ) {
     
     state $query-schemata = q{
         SELECT SCHEMA( ) AS name
@@ -76,6 +76,6 @@ submethod BUILD ( :$connection! ) {
         ORDER BY `constraint_name`, `position_in_unique_constraint`
     };
     
-    $!name = self!discover( :$connection, :$query-schemata, :$query-tables, :$query-columns, :$query-relations );
+    $!name = self!discover( :$query-schemata, :$query-tables, :$query-columns, :$query-relations );
 
 }

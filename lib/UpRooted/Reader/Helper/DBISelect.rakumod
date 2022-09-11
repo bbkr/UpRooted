@@ -1,6 +1,7 @@
+use UpRooted::Helper::FQN;
 use UpRooted::Helper::DBIConnection;
 
-unit role UpRooted::Reader::Helper::DBISelect does UpRooted::Helper::DBIConnection;
+unit role UpRooted::Reader::Helper::DBISelect does UpRooted::Helper::FQN does UpRooted::Helper::DBIConnection;
 
 =begin pod
 
@@ -10,8 +11,12 @@ UpRooted::Reader::Helper::DBISelect
 
 =head1 DESCRIPTION
 
+Implements L<UpRooted::Reader>.
+
 Converts L<UpRooted::Path> to SELECT ... JOIN ... JOIN .. WHERE query
 to reach data in leaf L<UpRooted::Table>s starting from given row in root L<UpRooted::Table>.
+
+Query is executed using DBI connection.
 
 =head1 METHODS
 

@@ -1,11 +1,10 @@
 use UpRooted::Writer;
-use UpRooted::Writer::Helper::File;
 use UpRooted::Writer::Helper::FileInsert;
-use UpRooted::Helper::DBIConnection;
+use UpRooted::Helper::Quoter;
 use DBIish;
 use DBDish::mysql::Native;
 
-unit class UpRooted::Writer::MySQLFile does UpRooted::Writer does UpRooted::Writer::Helper::File does UpRooted::Writer::Helper::FileInsert does UpRooted::Helper::DBIConnection;
+unit class UpRooted::Writer::MySQLFile does UpRooted::Writer does UpRooted::Writer::Helper::FileInsert does UpRooted::Helper::Quoter;
 
 =begin pod
 
@@ -43,64 +42,51 @@ File must not be present.
 
 =end pod
 
-submethod BUILD ( :$use-schema-name, :$file-naming ) {
+has $!driver;
 
-    $!use-schema-name = $use-schema-name // True;
-    $!file-naming = $file-naming // sub ( $tree, %conditions ) {
+submethod TWEAK {
+    
+    # use 'out.sql' as default file name
+    $!file-naming //= sub ( $tree, %conditions ) {
         return 'out.sql';
     };
-    
+
     # connect to MySQL driver to get access to MySQL quoting function
     # without having actual database connection
     DBIish.new.install-driver( 'mysql' );
-    class Connection {
-        has $.driver;
-
-        submethod BUILD { $!driver = DBDish::mysql::Native::MYSQL.mysql_init( ) }
-
-        submethod DESTROY {  $!driver.mysql_close( ) }
-
-        method quote( Str $x, :$as-id ) {
-            if $as-id {
-                return q[`] ~ $.driver.escape( $x ) ~ q[`]
-            } else {
-                return q['] ~ $.driver.escape( $x ) ~ q[']
-            }
-        }
-        
-    }
-    $!connection = Connection.new;
+    $!driver = DBDish::mysql::Native::MYSQL.mysql_init( );
     
 }
 
-method !quote-value ( $value, Bool :$is-binary = False ) {
+method !quote-identifier ( Str:D $id! ) {
 
-    if $value.defined {
-        
-        if $is-binary {
-            
-            # emulate mysqldump --hex-blob flag,
-            # this is so far the safest way to store and load binary in MySQL
-            return 'UNHEX( \'' ~ $.connection.driver.escape( $value, :bin ) ~ '\' )';
+    return '`' ~ $!driver.escape( $id ) ~ '`';
+}
+
+method !quote-constant ( $value, Bool :$is-binary = False ) {
+
+    return 'NULL' unless $value.defined;
+    
+    # emulate mysqldump --hex-blob flag,
+    # this is so far the safest way to store and load binary in MySQL
+    return 'UNHEX( \'' ~ $!driver.escape( $value, :bin ) ~ '\' )' if $is-binary;
+    
+    given $value {
+        when Buf {
+            return '\'' ~ $!driver.escape( $value.decode( ) ) ~ '\'';
         }
-        else {
-            
-            given $value {
-                when Buf {
-                    return $.connection.quote( $value.decode( ) );
-                }
-                when Str {
-                    return $.connection.quote( $value );
-                }
-                default {
-                    return $.connection.quote( $value.Str );
-                }
-            }
-            
+        when Str {
+            return '\'' ~ $!driver.escape( $value ) ~ '\'';
+        }
+        default {
+            return '\'' ~ $!driver.escape( $value.Str ) ~ '\'';
         }
     }
-    else {
         
-        return 'NULL';
-    }
+}
+
+submethod DESTROY {
+    
+    $!driver.mysql_close( );
+    
 }

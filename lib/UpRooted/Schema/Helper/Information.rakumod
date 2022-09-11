@@ -1,8 +1,9 @@
 use UpRooted::Table;
 use UpRooted::Column;
 use UpRooted::Relation;
+use UpRooted::Helper::DBIConnection;
 
-unit role UpRooted::Schema::Helper::Information;
+unit role UpRooted::Schema::Helper::Information does UpRooted::Helper::DBIConnection;
 
 =begin pod
 
@@ -13,13 +14,14 @@ UpRooted::Schema::Helper::Information
 =head1 DESCRIPTION
 
 Common code for discovering L<UpRooted::Schema>
-from Information Schema: L<https://en.wikipedia.org/wiki/Information_schema>.
+from Information Schema L<https://en.wikipedia.org/wiki/Information_schema>
+using DBI connection.
 
 =head1 METHODS
 
-=head2 discover
+=head2 !discover
 
-Expects connection and four queries. Each row in these queries should represent single entity and have following columns:
+Expects four queries. Each row in these queries should represent single entity and have following columns:
 
 C<$query-schemata> - schema C<name>.
 
@@ -32,24 +34,24 @@ C<$query-relations> - constraint C<name>, C<parent_table_name>, C<parent_column_
 WARNING: All returned column names (not values) must be lowercased.
 
 Returns schema name when discovery is complete
-so that class composing this role can set C<$!name> attribute during construction.
+so that class composing this role can set C<$!name> for L<UpRooted::Schema> attribute during construction.
 
 =end pod
 
-method !discover ( :$connection!, Str:D :$query-schemata!, Str:D :$query-tables!, Str:D :$query-columns!, Str:D :$query-relations! ) {
+method !discover ( Str:D :$query-schemata!, Str:D :$query-tables!, Str:D :$query-columns!, Str:D :$query-relations! ) {
     
-    sub fetch-array-of-hashes ( $connection, $query ) {
+    sub fetch-array-of-hashes ( $query ) {
     
-        my $statement = $connection.execute( $query );
+        my $statement = self.connection.execute( $query );
         my @data = $statement.allrows( :array-of-hash );
         $statement.dispose( );
     
         return @data;
     }
     
-    my $name = fetch-array-of-hashes( $connection, $query-schemata )[ 0 ]{ 'name' };
+    my $name = fetch-array-of-hashes( $query-schemata )[ 0 ]{ 'name' };
     
-    for fetch-array-of-hashes( $connection, $query-tables ) -> %table {
+    for fetch-array-of-hashes( $query-tables ) -> %table {
         
         UpRooted::Table.new(
             schema => self,
@@ -58,7 +60,7 @@ method !discover ( :$connection!, Str:D :$query-schemata!, Str:D :$query-tables!
         
     }
 
-    for fetch-array-of-hashes( $connection, $query-columns ).classify( *{ 'table_name' } ).kv -> $name, @columns {
+    for fetch-array-of-hashes( $query-columns ).classify( *{ 'table_name' } ).kv -> $name, @columns {
 
         my $table := self.table( $name );
 
@@ -76,7 +78,7 @@ method !discover ( :$connection!, Str:D :$query-schemata!, Str:D :$query-tables!
         
     }
 
-    for fetch-array-of-hashes( $connection, $query-relations ).classify( *{ 'name' } ).kv -> $name, @columns {
+    for fetch-array-of-hashes( $query-relations ).classify( *{ 'name' } ).kv -> $name, @columns {
 
         # it is impossible in known databases to have foreign key of given name referencing two different tables
         # so it is safe to take parent and child table names from first column set

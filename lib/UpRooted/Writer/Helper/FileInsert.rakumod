@@ -1,10 +1,17 @@
-unit role UpRooted::Writer::Helper::FileInsert;
+use UpRooted::Writer::Helper::File;
+use UpRooted::Helper::FQN;
+
+unit role UpRooted::Writer::Helper::FileInsert does UpRooted::Writer::Helper::File does UpRooted::Helper::FQN;
 
 =begin pod
+
+=head1 NAME
 
 UpRooted::Writer::MySQL::Helper::FileInsert
 
 =head1 DESCRIPTION
+
+Implements L<UpRooted::Writer>.
 
 Converts L<UpRooted::Table> and rows provided by L<UpRooted::Reader>
 to INSERT INTO .. VALUES query saved to `.sql` file.
@@ -31,7 +38,7 @@ method !write-table ( $table ) {
     # TODO there may be no data for given UpRooted::Table
     # this should only store current UpRooted::Table instance and be lazy
     my $query-insert = 'INSERT INTO ' ~ self!table-fqn( $table ) ~ ' ';
-    my @query-insert-columns = $table.columns.map: { $.connection.quote( $_.name, :as-id ) };
+    my @query-insert-columns = $table.columns.map: { self!quote-name( $_ ) };
     $query-insert ~= '( ' ~ @query-insert-columns.join( ', ' ) ~ ' ) VALUES ';
     
     # cache INSERT INTO part of query for subsequent row sets
@@ -48,7 +55,7 @@ method !write-row ( @row ) {
     for @row.kv -> $index, $value {
         my $type := %!sql-cache{ 'column-types' }[ $index ];
         my $is-binary = $type.defined && $type.ends-with( 'blob' );
-        @query-values.push: self!quote-value( $value, :$is-binary );
+        @query-values.push: self!quote-constant( $value, :$is-binary );
     }
     
     my $query-values = '( ' ~ @query-values.join( ', ' )  ~ ' )';

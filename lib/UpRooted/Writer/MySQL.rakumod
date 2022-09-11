@@ -1,8 +1,7 @@
 use UpRooted::Writer;
 use UpRooted::Writer::Helper::DBIInsert;
-use UpRooted::Helper::DBIConnection;
 
-unit class UpRooted::Writer::MySQL does UpRooted::Writer does UpRooted::Writer::Helper::DBIInsert does UpRooted::Helper::DBIConnection;
+unit class UpRooted::Writer::MySQL does UpRooted::Writer does UpRooted::Writer::Helper::DBIInsert;
 
 =begin pod
 
