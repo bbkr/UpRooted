@@ -20,7 +20,8 @@ Discovers L<UpRooted::Schema> from PostgreSQL database connection.
     my $connection = DBIish.connect( 'Pg', host => ..., port => ..., database => ... );
     my $schema = UpRooted::Schema::PostgreSQL.new( :$connection );
 
-Note that C<database> MUST be specified for connection.
+Note that C<database> MUST be specified for connection
+and currently set schema will be the one discovered.
 
 Connection is only used during construction
 and may be closed after L<UpRooted::Schema> is created.
@@ -96,7 +97,7 @@ Worth reading: L<https://stackoverflow.com/questions/61249732/null-values-for-re
 submethod BUILD ( :$!connection! ) {
     
     state $query-schemata = q{
-        SELECT current_database( ) AS name
+        SELECT CURRENT_SCHEMA( ) AS name
     };
     
     state $query-tables = q{
