@@ -87,7 +87,9 @@ Available variants:
 
 Note that `UpRooted::Reader` and `UpRooted::Writer` are independent. You can read from MySQL database and write directly to PostgreSQL database if needed.
 
-To find options accepted by each `UpRooted::Writer` call `p6doc` on chosen module.
+Disabling `UpRooted::Schema` name in Fully Qualified Names in queries may be useful for example when you need to write data to whatever schema is / will be used in connection.
+To do so provide flag to constructor like this: `UpRooted::Writer::MySQL.new( :!use-schema-name )`.
+To find other options accepted by each `UpRooted::Writer` call `p6doc` on chosen module.
 
 Note that not every `UpRooted::Writer` can save every data type provided by `UpRooted::Reader`. For example MySQL does not support PostgreSQL array types and will save them as joined strings.
 
