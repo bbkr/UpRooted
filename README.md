@@ -52,7 +52,7 @@ It can be discovered automatically by plugins like:
 
 In rare cases you may need to construct or fine tune `UpRooted::Schema` manually. For example if you use MySQL MyISAM engine or MySQL partitioning. Or you use PostgreSQL foreign keys relying on unique keys instead of unique constraints. Without proper foreign keys relations between `UpRooted::Table`s cannot be auto discovered and must be defined by hand. There is [separate manual](docs/Schema.md) describing this process.
 
-Creating `UpRooted::Schema` must be done only once per database.
+Creating `UpRooted::Schema` must be done only once per schema.
 
 ### UpRooted::Tree
 
@@ -65,7 +65,7 @@ Creating `UpRooted::Tree` must be done only once per root `UpRooted::Table`.
 
 ### UpRooted::Reader
 
-`UpRooted::Reader` transforms `UpRooted::Tree` to series of queries allowing to extract data that belong to given row in root `UpRooted::Table`. This is always database specific.
+`UpRooted::Reader` transforms `UpRooted::Tree` to series of queries allowing to extract data that belong to given row in root `UpRooted::Table`. This is always database engine specific.
 
 Available variants:
 
@@ -84,14 +84,12 @@ Available variants:
 * `UpRooted::Writer::MySQLFile` - Write to `.sql` file compatible with MySQL.
 * `UpRooted::Writer::PostgreSQL` - Write directly to another PostgreSQL database.
 * `UpRooted::Writer::PostgreSQLFile` (work in progress) - Write to `.sql` file compatible with PostgreSQL.
-* `UpRooted::Writer::JSONFiles` (work in progress) - Write to JSON files where each file is named after table and each line is single row from this table.
-* `UpRooted::Writer::CSVFiles` (work in progress) - Write to CSV files where each file is named after table and each line except header is single row from this table.
 
 Note that `UpRooted::Reader` and `UpRooted::Writer` are independent. You can read from MySQL database and write directly to PostgreSQL database if needed.
 
 To find options accepted by each `UpRooted::Writer` call `p6doc` on chosen module.
 
-Note that not every `UpRooted::Writer` can save every data type provided by `UpRooted::Reader`. For example CSV files cannot store binary data and you may need to provide convert function that will save it for example as Base64.
+Note that not every `UpRooted::Writer` can save every data type provided by `UpRooted::Reader`. For example MySQL does not support PostgreSQL array types and will save them as joined strings.
 
 ## CACHING
 
@@ -110,9 +108,9 @@ my $writer = UpRooted::Writer::MySQLFile.new(
     }
 );
     
-$writer.write( :$reader, id => 1 );
-$writer.write( :$reader, id => 2 );
-$writer.write( :$reader, id => 3 );
+$writer.write( $reader, id => 1 );
+$writer.write( $reader, id => 2 );
+$writer.write( $reader, id => 3 );
 ```
 
 It will create `1.sql`, `2.sql`, `3.sql` files without rediscovering everything every time.
