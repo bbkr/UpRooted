@@ -42,7 +42,7 @@ method !write-table ( $table ) {
 
 method !write-row ( @row ) {
     
-    $!statement.execute( @row );
+    $!statement.execute( |@row );
     
 }
 

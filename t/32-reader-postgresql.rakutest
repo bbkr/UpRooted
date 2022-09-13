@@ -37,7 +37,7 @@ subtest 'With data' => {
     
     is @result.shift.name, 't1', 'Root UpRooted::Table';
     is-deeply @result.shift, [
-        1, 'a', '😀😔', 'a', -1, 1, 9223372036854775807, 1.1, -0.3e0, 0.3e0, Buf.new( 0x00 ), Bool::True, Array[Int].new( 1, 2, 3 )
+        1, 'a', '😀😔', '😀😔', -1, 1, 9223372036854775807, 1.1, -0.3e0, 0.3e0, Buf.new( 0x00 ), Bool::True, Array[Int].new( 1, 2, 3 )
     ], 'Root data';
 
     # also confirms if no data from UpRooted::Tree starting at id = 2 leaked
