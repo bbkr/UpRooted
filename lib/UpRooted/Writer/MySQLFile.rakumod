@@ -67,19 +67,23 @@ method !quote-constant ( $value!, $type ) {
 
     return 'NULL' unless $value.defined;
     
-    # emulate mysqldump --hex-blob flag,
-    # this is so far the safest way to store and load binary in MySQL
-    return 'UNHEX( \'' ~ $!driver.escape( $value, :bin ) ~ '\' )'
-        if $type.defined && $type.ends-with( 'blob' );
-    
     given $value {
         when Buf {
-            return '\'' ~ $!driver.escape( $value.decode( ) ) ~ '\'';
+            # convert back to text Buf that was read from text field
+            # (UpRooted does not support non UTF-8 encodings)
+            return '\'' ~ $!driver.escape( $value.decode( ) ) ~ '\''
+                if $type.defined && $type.ends-with( 'text' );
+            
+            # emulate mysqldump --hex-blob flag,
+            # this is so far the safest way to store and load binary in MySQL
+            return 'UNHEX( \'' ~ $!driver.escape( $value, :bin ) ~ '\' )';
         }
         when Str {
             return '\'' ~ $!driver.escape( $value ) ~ '\'';
         }
         default {
+            # BTW: this will also stringify nicely PostgreSQL array type
+            # Array[Int].new( 1, 2, 3 ) will be saved as '1 2 3'
             return '\'' ~ $!driver.escape( $value.Str ) ~ '\'';
         }
     }
