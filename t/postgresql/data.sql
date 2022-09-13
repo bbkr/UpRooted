@@ -3,7 +3,7 @@ INSERT INTO "t1"
     ( "id", "c_01", "c_02", "c_03", "c_04", "c_05", "c_06", "c_07", "c_08", "c_09", "c_10", "c_11", "c_12" )
 VALUES
     -- main 
-    ( 1, 'a', '😀😔', 'a', -1, 1, 9223372036854775807, 1.1, -0.3, 0.3, '\x00', TRUE, ARRAY[ 1, 2, 3 ] ),
+    ( 1, 'a', '😀😔', '😀😔', -1, 1, 9223372036854775807, 1.1, -0.3, 0.3, '\x00', TRUE, ARRAY[ 1, 2, 3 ] ),
     ( 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL );
 
 -- not nullable single column relation
