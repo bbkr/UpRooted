@@ -1,0 +1,87 @@
+use lib 'lib';
+
+use Test;
+
+use UpRooted::Schema;
+use UpRooted::Table;
+use UpRooted::Column;
+use UpRooted::Relation;
+use UpRooted::Tree;
+use UpRooted::Reader;
+use UpRooted::Writer::PostgreSQLFile;
+
+plan 3;
+
+class UpRooted::Reader::Dummy does UpRooted::Reader {
+
+    method !read-path ( $path, %conditions ) {
+        
+        given $path.leaf-table.name {
+            when 't1' {
+                take [ 1, Any:U, 'a', Buf.new( 0xF0, 0x9F, 0x98, 0x80 ), Buf.new( 0x00, 0x01 ), True, [ Array[ Int ].new( 1, 2 ), Array[ Int ].new( 3, Int:U ) ] ]
+            }
+            when 't2' {
+                take [ 1 ];
+                take [ 1 ];
+            }
+        
+        }
+    }
+}
+
+my $schema = UpRooted::Schema.new( name => 's1' );
+UpRooted::Table.new( :$schema, name => 't1' );
+UpRooted::Table.new( :$schema, name => 't2' );
+UpRooted::Table.new( :$schema, name => 't3' );
+UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable, type => 'int' );
+UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c2', :is-nullable );
+UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c3', :!is-nullable, type => 'varchar' );
+UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c4', :!is-nullable, type => 'text' );
+UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c5', :!is-nullable, type => 'bytea' );
+UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c6', :!is-nullable, type => 'boolean' );
+UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c7', :!is-nullable, type => 'array' );
+UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c8', :!is-nullable );
+UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c9', :!is-nullable );
+UpRooted::Relation.new(
+    parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+    child-columns => $schema.table( 't2' ).columns( 'c8' ),
+    name => 'r1'
+);
+UpRooted::Relation.new(
+    parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+    child-columns => $schema.table( 't3' ).columns( 'c9' ),
+    name => 'r2'
+);
+my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+my $reader = UpRooted::Reader::Dummy.new( :$tree );
+my $writer = UpRooted::Writer::PostgreSQLFile.new;
+
+# clear if previous test run failed
+unlink 'out.sql', 's1_1.sql';
+
+$writer.write( $reader, c1 => 1 );
+
+my $got-file = 'out.sql'.IO.slurp;
+my $expected-file = q:to/END/;
+    BEGIN;
+    INSERT INTO "s1"."t1" ( "c1", "c2", "c3", "c4", "c5", "c6", "c7" ) VALUES ( 1, NULL, 'a', '😀', '\x0001', TRUE, ARRAY[ ARRAY[ 1, 2 ], ARRAY[ 3, NULL ] ] );
+    INSERT INTO "s1"."t2" ( "c8" ) VALUES ( 1 );
+    INSERT INTO "s1"."t2" ( "c8" ) VALUES ( 1 );
+    COMMIT;
+    END
+
+is $got-file, $expected-file, 'File generated';
+unlink 'out.sql';
+
+UpRooted::Writer::PostgreSQLFile.new( :!use-schema-name ).write( $reader, c1 => 1 );
+$got-file = 'out.sql'.IO.slurp;
+ok $got-file.contains( 'INSERT INTO "t1"' ), 'Without UpRooted::Schema name';
+unlink 'out.sql';
+
+UpRooted::Writer::PostgreSQLFile.new( 
+    file-naming => sub ( $tree, %conditions ) {
+        return $tree.root-table.schema.name ~ '_' ~ %conditions{ 'c1' } ~ '.sql';
+    }
+).write( $reader, c1 => 1 );
+ok 's1_1.sql'.IO ~~ :e, 'With custom naming';
+unlink 's1_1.sql';

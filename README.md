@@ -31,7 +31,7 @@ use UpRooted::Reader::MySQL;
 my $reader = UpRooted::Reader::MySQL.new( :$connection, :$tree );
 
 use UpRooted::Writer::MySQLFile;
-my $writer = UpRooted::Writer::MySQLFile.new( :!use-schema-name );
+my $writer = UpRooted::Writer::MySQLFile.new;
     
 $writer.write( $reader, id => 1 );
 ```
@@ -83,7 +83,7 @@ Available variants:
 * `UpRooted::Writer::MySQL` - Write directly to another MySQL database.
 * `UpRooted::Writer::MySQLFile` - Write to `.sql` file compatible with MySQL.
 * `UpRooted::Writer::PostgreSQL` - Write directly to another PostgreSQL database.
-* `UpRooted::Writer::PostgreSQLFile` (work in progress) - Write to `.sql` file compatible with PostgreSQL.
+* `UpRooted::Writer::PostgreSQLFile` - Write to `.sql` file compatible with PostgreSQL.
 
 Note that `UpRooted::Reader` and `UpRooted::Writer` are independent. You can read from MySQL database and write directly to PostgreSQL database if needed.
 
@@ -116,6 +116,14 @@ $writer.write( $reader, id => 3 );
 ```
 
 It will create `1.sql`, `2.sql`, `3.sql` files without rediscovering everything every time.
+
+## EXTENSIONS
+
+`UpRooted` is written with extensibility in mind.
+
+Base version will focus on MySQL and PostgreSQL databases, as those are the two most common open source ones.
+
+However if you need for example to create `UpRooted::Schema` from Red ORM, make `UpRooted::Writer` to save set of CSV files or even implement whole `UpRooted` stack to work with MS SQL - do not be afraid to implement it. Interfaces are simple, well documented and checking existing MySQL / PostgreSQL code will give you the idea how little is actually needed to extend `UpRooted` capabilities.
 
 ## SCHEMA DESIGN ISSUES
 
@@ -218,8 +226,3 @@ To understand this issue better consider two answers to question `How many legs 
 The fix to horse riddle issue is to redesign schema so at least one not nullable relation leads to every table.
 
 `UpRooted::Tree` will warn if this design error is detected (work in progress).
-
-## CONTACT
-
-You can find me (and many awesome people who helped me to develop this module)
-on irc.freenode.net #raku channel as **bbkr**.
