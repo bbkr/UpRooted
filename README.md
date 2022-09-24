@@ -38,6 +38,10 @@ $writer.write( $reader, id => 1 );
 
 Your user will be saved as `out.sql` file.
 
+## DOCKER
+
+If you do not have Raku installed UpRooted is also available as [Docker image](https://hub.docker.com/repository/docker/bbkr2/uprooted).
+
 ## MODULES
 
 This section explains role of every module in `UpRooted` stack and tells which variants of each module are available.
