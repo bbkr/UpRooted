@@ -65,7 +65,7 @@ from root L<UpRooted::Table> to leaf L<UpRooted::Table>.
 
 =end pod
 
-has $!order = 0;
+has Int $!order = 0;
 
 method order ( ) {
     
@@ -113,7 +113,7 @@ it means L<UpRrooted::Tree> did not stop properly.
 
 =end pod
 
-has $!looped = False;
+has Bool $!looped = False;
 
 method looped ( ) {
     
