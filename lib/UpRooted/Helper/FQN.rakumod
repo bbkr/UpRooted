@@ -23,7 +23,7 @@ Default to C<True> (enabled).
 
 =end pod
 
-has $.use-schema-name = True;
+has Bool $.use-schema-name = True;
 
 =begin pod
 
@@ -50,7 +50,7 @@ Returns Fully Qualified Name of L<UpRooted::Table>.
 
 =end pod
 
-method !table-fqn ( $table ) {
+method !table-fqn ( $table --> Str ) {
     
     return join( '.', self!schema-fqn( $table.schema ), self!quote-name( $table ) );
 }
@@ -63,7 +63,7 @@ Returns Fully Qualified Name of L<UpRooted::Column>.
 
 =end pod
 
-method !column-fqn ( $column ) {
+method !column-fqn ( $column --> Str ) {
     
     return join( '.', self!table-fqn( $column.table ), self!quote-name( $column ) );
 }

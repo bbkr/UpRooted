@@ -33,7 +33,7 @@ Provides quotinq of database identifiers by current database driver.
 
 =end pod
 
-method !quote-identifier ( Str:D $id! ) {
+method !quote-identifier ( Str:D $id! --> Str ) {
     
     return $.connection.quote( $id, :as-id );
 }
@@ -48,7 +48,7 @@ Optional type is ignored at this level.
 
 =end pod
 
-method !quote-constant ( $constant!, $type ) {
+method !quote-constant ( $constant!, $type --> Str ) {
     
     return $.connection.quote( $constant );
 }

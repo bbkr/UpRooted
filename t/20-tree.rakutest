@@ -277,11 +277,11 @@ subtest 'UpRooted::Path loops' => {
     );
     
     my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
-    is $path.looped, False, 'Root table alone is never looped.';
+    is $path.is-looped, False, 'Root table alone is never looped.';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     throws-like {
-        $path.looped;
+        $path.is-looped;
     }, Exception, message => 'No UpRooted::Relations in UpRooted::Path between UpRooted::Table t1 and UpRooted::Table t2.', 'Loop cannot be determined without UpRooted::Relations between UpRooted::Tables.';
 
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
@@ -291,28 +291,28 @@ subtest 'UpRooted::Path loops' => {
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
     is $path.analyze-relations( $relation_t1_t1 ), False, 'Root loop circuit breaker triggered';
-    is $path.looped, True, 'UpRooted::Path marked as looped';
+    is $path.is-looped, True, 'UpRooted::Path marked as looped';
     is-deeply $path.relations, [], 'Looped UpRooted::Path does not establish UpRooted::Relations';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     is $path.analyze-relations( $relation_t1_t2, $relation_t2_t2 ), False, 'Short loop circuit breaker triggered';
-    is $path.looped, True, 'UpRooted::Path marked as looped';
+    is $path.is-looped, True, 'UpRooted::Path marked as looped';
     throws-like {
         $path.relations;
     }, Exception, message => 'No UpRooted::Relations in UpRooted::Path between UpRooted::Table t1 and UpRooted::Table t2.', 'Looped UpRooted::Path does not establish UpRooted::Relations';
 
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't1' ) );
     is $path.analyze-relations( $relation_t1_t2, $relation_t2_t1 ), False, 'Long loop circuit breaker triggered';
-    is $path.looped, True, 'UpRooted::Path marked as looped';
+    is $path.is-looped, True, 'UpRooted::Path marked as looped';
     is-deeply $path.relations, [], 'Looped UpRooted::Path does not establish UpRooted::Relations';
     
     $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
     is $path.analyze-relations( $relation_t1_t2 ), True, 'No loop detected';
-    is $path.looped, False, 'UpRooted::Path is not marked as looped';
+    is $path.is-looped, False, 'UpRooted::Path is not marked as looped';
     is $path.analyze-relations( $relation_t1_t2, $relation_t2_t2 ), False, 'Loop circuit breaker triggered';
-    is $path.looped, True, 'UpRooted::Path marked as looped';
+    is $path.is-looped, True, 'UpRooted::Path marked as looped';
     is $path.analyze-relations( $relation_t1_t2 ), True, 'No loop detected';
-    is $path.looped, True, 'UpRooted::Path is still marked as looped';
+    is $path.is-looped, True, 'UpRooted::Path is still marked as looped';
     
 };
 

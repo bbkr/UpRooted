@@ -58,7 +58,7 @@ submethod TWEAK {
     
 }
 
-method !quote-identifier ( Str:D $id! ) {
+method !quote-identifier ( Str:D $id! --> Str ) {
 
     return $!driver.quote( $id, :as-id );
 }

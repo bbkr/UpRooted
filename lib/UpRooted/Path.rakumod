@@ -77,7 +77,7 @@ method order ( ) {
 
 =begin pod
 
-=head2 looped
+=head2 is-looped
 
 Looped L<UpRooted::Path> means that leaf L<UpRooted::Table>
 occured in L<UpRooted::Relation>s chain as parent L<UpRooted::Table>.
@@ -113,19 +113,19 @@ it means L<UpRrooted::Tree> did not stop properly.
 
 =end pod
 
-has Bool $!looped = False;
+has Bool $!is-looped = False;
 
-method looped ( ) {
+method is-looped ( --> Bool ) {
     
     # if for any reason looped UpRrooted::Relations chain was analyzed first
     # then UpRrooted::Path is known to be looped
     # without UpRrooted::Relations between root and leaf UpRrooted::Tables established
-    return $!looped if $!looped;
+    return $!is-looped if $!is-looped;
     
     # verify if UpRrooted::Relations are established
     sink self.relations;
     
-    return $!looped;
+    return $!is-looped;
 }
 
 =begin pod
@@ -180,7 +180,7 @@ Can be called only after any L<UpRooted::Relation>s chain is established.
 
 =end pod
 
-method is-nullable ( ) {
+method is-nullable ( --> Bool ) {
     
     return so self.relations.first: *.is-nullable;
 }
@@ -200,7 +200,7 @@ and this L<UpRooted::Relation>s chain should not be analyzed further.
 
 =end pod
 
-method analyze-relations ( *@relations where { .elems } ) {
+method analyze-relations ( *@relations where { .elems } --> Bool ) {
     
     die sprintf 'UpRooted::Relations root UpRooted::Table is different than %s.', $.root-table.name
         unless @relations.head.parent-table === $.root-table;
@@ -221,7 +221,7 @@ method analyze-relations ( *@relations where { .elems } ) {
         unless @relations.tail.child-table === $.leaf-table;
     
     if @relations.first: *.parent-table === $.leaf-table {
-        $!looped = True;
+        $!is-looped = True;
         return False;
     }
     

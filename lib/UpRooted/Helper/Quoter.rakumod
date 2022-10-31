@@ -25,7 +25,7 @@ Quoted name will be cached for faster subsequent calls.
 
 =end pod
 
-method !quote-name ( $entity! ) {
+method !quote-name ( $entity! --> Str ) {
     
     return %!quote-cache{ $entity.name } //= self!quote-identifier( $entity.name );
 }

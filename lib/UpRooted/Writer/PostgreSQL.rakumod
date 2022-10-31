@@ -38,7 +38,7 @@ from Fully Qualified Names in statements by using C<use-schema-name> flag:
 
 =end pod
 
-method !column-fqn ( $column ) {
+method !column-fqn ( $column --> Str ) {
     
     # PostgreSQL does not accept Fully Qualified Names for column list in INSERT
     return self!quote-name( $column );
