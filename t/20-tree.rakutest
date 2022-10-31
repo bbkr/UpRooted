@@ -9,7 +9,7 @@ use UpRooted::Relation;
 use UpRooted::Path;
 use UpRooted::Tree;
 
-plan 9;
+plan 10;
 
 subtest 'UpRooted::Path single node' => {
 
@@ -314,6 +314,75 @@ subtest 'UpRooted::Path loops' => {
     is $path.analyze-relations( $relation_t1_t2 ), True, 'No loop detected';
     is $path.is-looped, True, 'UpRooted::Path is still marked as looped';
     
+};
+
+subtest 'UpRooted::Path ambiguity' => {
+    
+    plan 6;
+    
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Table.new( :$schema, name => 't3' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c3', :is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c4', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c5', :is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't3' ), name => 'c6', :!is-nullable );
+    my $relation_t1_t2_1 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r1'
+    );
+    my $relation_t1_t2_2 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c3' ),
+        name => 'r2'
+    );
+    my $relation_t1_t2_3 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c4' ),
+        name => 'r3'
+    );
+    my $relation_t2_t3_1 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c3' ),
+        child-columns => $schema.table( 't3' ).columns( 'c6' ),
+        name => 'r4'
+    );
+    my $relation_t2_t3_2 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't2' ).columns( 'c4' ),
+        child-columns => $schema.table( 't3' ).columns( 'c5' ),
+        name => 'r5'
+    );
+
+    # ambiguity happens because of two nullable UpRooted::Relations
+    # connecting the same UpRooted::Table pair
+    my $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't2' ) );
+    
+    throws-like {
+        $path.is-ambiguous;
+    }, Exception, message => 'No UpRooted::Relations in UpRooted::Path between UpRooted::Table t1 and UpRooted::Table t2.', 'Ambiguity cannot be determined without UpRooted::Relations between UpRooted::Tables.';
+    
+    $path.analyze-relations( $relation_t1_t2_1 );
+    is $path.is-ambiguous, False, 'UpRooted::Path is not ambiguous if exactly one nullable UpRooted::Relation is found between UpRooted::Tables';
+    
+    $path.analyze-relations( $relation_t1_t2_2 );
+    is $path.is-ambiguous, True, 'UpRooted::Path is ambiguous because two nullable UpRooted::Relations exists between UpRooted::Tables';
+    
+    $path.analyze-relations( $relation_t1_t2_3 );
+    is $path.is-ambiguous, False, 'UpRooted::Path is no longer ambiguous, not nullable UpRooted::Relation found between UpRooted::Tables';
+
+    # ambiguity happens because there are two nullable UpRooted::Relations
+    # connecting different UpRooted::Table pairs
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+
+    $path.analyze-relations( $relation_t1_t2_3, $relation_t2_t3_2 ); # not nullable, nullable
+    is $path.is-ambiguous, False, 'UpRooted::Path is not ambiguous if leaf UpRooted::Table is reachable through exactly one nullable UpRooted::Relations chain';
+    
+    $path.analyze-relations( $relation_t1_t2_1, $relation_t2_t3_1 ); # nullable, not nullable
+    is $path.is-ambiguous, True, 'UpRooted::Path is ambiguous if leaf UpRooted::Table is reachable through more than one nullable UpRooted::Relations chains';
+
 };
 
 # helper to convert UpRooted::Tree to UpRooted::Table names for easy testing

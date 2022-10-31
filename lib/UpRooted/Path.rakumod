@@ -97,8 +97,8 @@ Sample looped L<UpRooted::Path>s following root to leaf:
     A -------> B
          B -------> B
 
-Loops should not be processed further by L<UpRrooted::Tree> to avoid... infinite loop :)
-In case of loop being detected C<False> must be returned by L<UpRrooted::Path::analyze-relations> as circuit breaker.
+Loops should not be processed further by L<UpRooted::Tree> to avoid... infinite loop :)
+In case of loop being detected C<False> must be returned by L<UpRooted::Path::analyze-relations> as circuit breaker.
 
 Tech note: Only leaf L<UpRooted::Table> is important, those are NOT looped paths from A to C:
 
@@ -109,7 +109,7 @@ Tech note: Only leaf L<UpRooted::Table> is important, those are NOT looped paths
           B -------> B
 
 And they should never be analyzed. If they are encountered during analysis
-it means L<UpRrooted::Tree> did not stop properly.
+it means L<UpRooted::Tree> did not stop properly.
 
 =end pod
 
@@ -117,15 +117,49 @@ has Bool $!is-looped = False;
 
 method is-looped ( --> Bool ) {
     
-    # if for any reason looped UpRrooted::Relations chain was analyzed first
-    # then UpRrooted::Path is known to be looped
-    # without UpRrooted::Relations between root and leaf UpRrooted::Tables established
+    # if for any reason looped UpRooted::Relations chain was analyzed first
+    # then UpRooted::Path is known to be looped
+    # without UpRooted::Relations between root and leaf UpRooted::Tables established
     return $!is-looped if $!is-looped;
     
-    # verify if UpRrooted::Relations are established
+    # verify if UpRooted::Relations are established
     sink self.relations;
     
     return $!is-looped;
+}
+
+=begin pod
+
+=head2 is-ambiguous
+
+Ambiguous L<UpRooted::Path> means that leaf L<UpRooted::Table>
+can be reached by more than one nullable L<UpRooted::Relation>s chain
+and can not be reached through not nullable L<UpRooted::Relation>s chain.
+
+Example of ambiguous L<UpRooted::Path> with nullable L<UpRooted::Relation>s
+between the same pair of L<UpRooted::Table>s.
+
+    A ------------> X --nullable--> B
+    A ------------> Y --nullable--> B
+
+Example of ambiguous L<UpRooted::Path> with nullable L<UpRooted::Relation>s
+between different L<UpRooted::Table>s.
+
+    A --nullable--> X ------------> B
+    A ------------> Y --nullable--> B
+
+In this case most likely L<UpRooted::Reader> will not find every row in leaf L<UpRooted::Table>.
+
+=end pod
+
+has Bool $!is-ambiguous = False;
+
+method is-ambiguous ( --> Bool ) {
+    
+    # verify if UpRooted::Relations are established
+    sink self.relations;
+    
+    return $!is-ambiguous;
 }
 
 =begin pod
@@ -135,29 +169,14 @@ method is-looped ( --> Bool ) {
 Describes how to reach leaf L<UpRooted::Table> from root L<UpRooted::Table>.
 Will die if L<UpRooted::Relation>s chain was not established.
 
-Tech note 1: This is equal to shortest chain of not nullable L<UpRooted::Relation>s
+This is equal to shortest chain of not nullable L<UpRooted::Relation>s
 from root L<UpRooted::Table> to leaf L<UpRooted::Table>.
 It is guaranteed that by following those L<UpRooted::Relation>s from row in root L<UpRooted::Table>
 all data will be reached.
 
-Tech note 2: If chain of not nullable L<UpRooted::Relation>s is not available
+If chain of not nullable L<UpRooted::Relation>s is not available
 then shortest chain of nullable L<UpRooted::Relation>s also guarantee that all data will be reached.
-Except "horse riddle" situation: L<https://github.com/bbkr/exodus#opaque-uniqueness-aka-horse-riddle>.
-
-Tech note 3: Horse riddle occurs when there are two chains of L<UpRooted::Relation>s.
-They fork at some L<UpRooted::Table>,
-then each chain contains nullable L<UpRooted::Relation> somewhere along the way
-and finally they join at other L<UpRooted::Table>. For example following root to leaf:
-
-    A ------------> X --nullable--> B
-    A ------------> Y --nullable--> B
-
-    A --nullable--> X ------------> B
-    A ------------> Y --nullable--> B
-
-In both cases two L<UpRooted::Path>s fork at L<UpRooted::Table> C<A>,
-then each L<UpRooted::Path> has at least one nullable L<UpRooted::Relation>
-before they join at L<UpRooted::Table> C<B>.
+Except for cases described in L<is-ambiguous> flag.
 
 =end pod
 
@@ -238,7 +257,8 @@ method analyze-relations ( *@relations where { .elems } --> Bool ) {
         
         if so @relations.first: *.is-nullable {
         
-            # TODO check for horse riddle
+            # more than one nullable UpRooted::Relations chain encountered
+            $!is-ambiguous = True;
             
             # shorter nullable UpRooted::Relations chain is better than longer nullable one
             @!relations = @relations if @relations.elems < @!relations.elems;
@@ -249,7 +269,8 @@ method analyze-relations ( *@relations where { .elems } --> Bool ) {
             # not nullable UpRooted::Relations chain is always better than nullable one, regardless of length
             @!relations = @relations;
             
-            # TODO clear horse riddle flag if any
+            # not nullable UpRooted::Relations chain is never ambiguous
+            $!is-ambiguous = False;
         
         }
     

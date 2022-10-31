@@ -51,6 +51,7 @@ This section explains role of every module in `UpRooted` stack and tells which v
 `UpRooted::Schema` describes relation between `UpRooted::Tables`.
 
 It can be discovered automatically by plugins like:
+
 * `UpRooted::Schema::MySQL`
 * `UpRooted::Schema::PostgreSQL`
 
@@ -131,11 +132,28 @@ However if you need for example to create `UpRooted::Schema` from Red ORM, make 
 
 ## SCHEMA DESIGN ISSUES
 
+Relational databases are extremly flexible in terms of schema design.
+However there are few rules you must follow if you want to work with data trees.
+
+If you use `UpRooted` but do not get expected results please go through this list carefully before creating issue on GitHub.
+
+### Data is transformed (extra rows, counters are too high) when written to another database
+
+**Cause:** There are `ON INSERT` triggers changing data.
+
+This one is very easy to overlook.
+Triggers are convenient, relaible and cheap way of managing entangled data state.
+For example when row is inserted into `orders` table increase counter in `order_stats` table by `1`.
+
+But those triggers will get in a way of copying / moving data trees literally between databases, because they will "replay" their logic when data tree is written to another database.
+
+**Fix:** When designing schema with data tree reading / writing in mind triggers can be only used to verify constraints.
+
 ### Data tree is not writable to another database without disabling foreign key constraints
 
-By default `UpRooted` resolves dependencies and whole purpose of `UpRooted::Tree` is to provide data in correct order.
+**Cause 1:** There are self-looped tables. Usually implementing tree logic.
 
-However it may be not possible if table is directly referencing itself.
+By default `UpRooted` resolves dependencies and whole purpose of `UpRooted::Tree` is to provide data in correct order. However it may be not possible if table is directly referencing itself.
 
 ```
     +----------+
@@ -156,7 +174,18 @@ However it may be not possible if table is directly referencing itself.
               +--------------------+
 ```
 
-For example our database serves as photo management software and user has album with `id = 2` as subcategory of album with `id = 1`. Then he rearranges his collection, so that the album with `id = 2` is on top. In such scenario if database returned data tree rows in primary key order then it will not be possible to insert album with `id = 1` because it requires presence of album with `id = 2`. The fix is to have separate table that establishes hierarchy between rows:
+For example user has album with `id = 2` as subcategory of album with `id = 1`. Then he rearranges his collection, so that the album with `id = 2` is on top. In such scenario if database returned data tree rows in primary key order then it will not be possible to insert album with `id = 1` because it requires presence of album with `id = 2`.
+
+**Hint 1:**
+
+You can check if `UpRooted::Tree` has loops by running:
+
+```raku
+my $tree = ...;
+say $tree.paths.grep: *.is-looped;
+```
+
+**Fix 1:** Have separate table that establishes tree hierarchy between rows:
 
 ```
     +----------+
@@ -183,9 +212,33 @@ For example our database serves as photo management software and user has album 
              +------------------+ 
 ```
 
-### Data tree contains incomplete set of rows from some table
+**Cause 2:** Jailbreak. Data from one tree links to data from another tree. Usually implementing relations or activities between users.
 
-This happens if there are only multiple nullable relation paths to this table.
+```
+      +----------+        +------------+
+      | users    |        | blog_posts |
+      +----------+        +------------+
+    +-| id       |---+    | id         |---+
+    | | login    |   +---<| user_id    |   |
+    | | password |        | text       |   |
+    | +----------+        +------------+   |
+    |                                      |
+    |    +--------------+                  |
+    |    | comments     |                  |
+    |    +--------------+                  |
+    |    | blog_post_id |>-----------------+
+    +---<| user_id      |
+         | text         |
+         +--------------+
+```
+
+For example user with `id = 1` created a blog post that was commented by user with `id = 2`. Now record from `comments` table has two owners, one direct (belongs to user with `id = 2`) and one indirect (belongs to post written by user with `id = `1`).
+
+**Fix 2:** Unfortunately the only way to detach two data trees in such case is to remove one of foreign key constraints.
+
+### Some rows from table are missing
+
+**Cause:** Ambiguity in correct way of reaching rows in table. Only multiple nullable relation paths to this table exist.
 
 ```
                   +----------+
@@ -227,6 +280,13 @@ To understand this issue better consider two answers to question `How many legs 
 * `Eight. Two front, two rear, two left and two right.` This answer is incorrect because each leg is counted multiple times from different nullable relations.
 * `Four. Those attached to it.` This answer is correct because each leg is counted exactly once through not nullable relation.
 
-The fix to horse riddle issue is to redesign schema so at least one not nullable relation leads to every table.
+**Hint:**
 
-`UpRooted::Tree` will warn if this design error is detected (work in progress).
+You can check if `UpRooted::Tree` has ambiguities by running:
+
+```raku
+my $tree = ...;
+say $tree.paths.grep: *.is-ambiguous;
+```
+
+**Fix:** Redesign schema so that at least one not nullable relations path leads to every table.
