@@ -217,12 +217,18 @@ Will return C<True> if L<UpRooted::Tree> can proceed.
 Or C<False> to indicate that loop occured
 and this L<UpRooted::Relation>s chain should not be analyzed further.
 
+Blocked L<UpRooted::Relation>s should nod be presented for analysis.
+
 =end pod
 
 method analyze-relations ( *@relations where { .elems } --> Bool ) {
     
     die sprintf 'UpRooted::Relations root UpRooted::Table is different than %s.', $.root-table.name
         unless @relations.head.parent-table === $.root-table;
+    
+    if @relations.first: *.is-blocked -> $relation {
+        die sprintf 'UpRooted::Relation %s is blocked.', $relation.name;
+    }
     
     for @relations.rotor( 2 => -1 ) -> ( $a, $b ) {
         die sprintf 'Parent UpRooted::Relation %s and child UpRooted::Relation %s are not referring to the same UpRooted::Table.', $a.name, $b.name

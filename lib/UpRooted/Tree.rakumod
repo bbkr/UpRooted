@@ -66,7 +66,8 @@ submethod BUILD ( :$!root-table ) {
         
         # DFS descent to child UpRooted::Tables
         for $table.children-relations -> $relation  {
-            samewith( |@relations, $relation );
+            # only use non blocked UpRooted::Relations
+            samewith( |@relations, $relation ) unless $relation.is-blocked;
         }
         
     };

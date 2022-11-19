@@ -91,6 +91,30 @@ UpRooted::Relation.new(
 
 Arity must be the same.
 
+## Blocking relations
+
+Sometimes one `UpRooted::Relation` between two `UpRooted::Table`s
+is less efficient to join these tables than another `UpRooted::Relation`.
+To block single `UpRooted::Relation` between two `UpRooted::Table`s set `is-blocked` attribute:
+
+```raku
+$parent-table.child-relation( 'some-relation-name' ).is-blocked = True;
+```
+
+Sometimes there is `UpRooted::Table` that should not be included in `UpRooted::Tree`,
+for example referral connections causing jailbreak or not important large logs.
+To exclude `UpRooted::Table` from `UpRooted::Tree` block all `UpRooted::Relation`s leading to this table:
+
+```raku
+for $schema.tables -> $table {
+    for table.children-relations -> $relation {
+        $relation.is-blocked = True if $relation.child-columns.first.table.name eq 'some-table-name';
+    }
+}
+```
+
+Blocking must be applied **before** `UpRooted::Tree` is derived.
+
 ## Cross schema relations
 
 Just define two `UpRooted::Schema`s with `UpRooted::Table`s and `UpRooted::Column`s in them.

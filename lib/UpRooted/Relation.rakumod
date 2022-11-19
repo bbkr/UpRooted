@@ -32,13 +32,34 @@ but only uniqueness per L<UpRooted::Table> is required here.
 
 has Str $.name is required;
 
+=begin pod
+
+=head2 is-blocked
+
+Sometimes one L<UpRooted::Relation> between two L<UpRooted::Table>s
+is less efficient to join these tables than another L<UpRooted::Relation>.
+
+Sometimes there are L<UpRooted::Table>s that should not be included in L<UpRooted::Tree>,
+for example referral connection causing jailbreak or not important large logs.
+
+Blocking allows to not use specific L<UpRooted::Relation>
+and if all L<UpRooted::Relation>s leading to L<UpRooted::Table> are skipped
+to skip whole L<UpRooted::Table> as well.
+
+Blocking must be applied before L<UpRooted::Tree> is derived.
+
+=end pod
+
+has Bool $.is-blocked is rw;
+
 has @!parent-columns;
 has @!child-columns;
 
 submethod BUILD (
 	:@!parent-columns! where { .elems },
 	:@!child-columns! where { .elems },
-	Str:D :$!name!
+	Str:D :$!name!,
+    Bool:D :$!is-blocked = False
 ) {
 
 	die sprintf 'Parent and child UpRooted::Columns count different in UpRooted::Relation %s.', $!name

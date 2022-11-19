@@ -9,7 +9,7 @@ use UpRooted::Relation;
 use UpRooted::Path;
 use UpRooted::Tree;
 
-plan 10;
+plan 11;
 
 subtest 'UpRooted::Path single node' => {
 
@@ -120,7 +120,7 @@ subtest 'UpRooted::Path nullability' => {
 
 subtest 'UpRooted::Path relations analyze' => {
     
-    plan 7;
+    plan 8;
     
     # there are 3 tables: t1, t2, t3
     # t1->t2, t1->t3, t2->t3 are connected by both nullable and not nullable relations
@@ -199,6 +199,12 @@ subtest 'UpRooted::Path relations analyze' => {
     $path.analyze-relations( $relation_t1_t3_not_nullable );
     $path.analyze-relations( $relation_t1_t2_not_nullable, $relation_t2_t3_not_nullable );
     is-deeply $path.relations, [ $relation_t1_t3_not_nullable ], 'Longer not nullable UpRooted::Relations are not better than shorter not nullable ones';
+
+    $relation_t1_t3_not_nullable.is-blocked = True;
+    $path = UpRooted::Path.new( root-table => $schema.table( 't1' ), leaf-table => $schema.table( 't3' ) );
+    throws-like {
+        $path.analyze-relations( $relation_t1_t3_not_nullable )
+    }, Exception, message => 'UpRooted::Relation r3 is blocked.', 'Blocked UpRooted::Relation should not be presented for analysis.';
 
 };
 
@@ -502,3 +508,33 @@ subtest 'UpRooted::Tree loops' => {
     is-deeply path-to-tables( $tree ), [ [ 't1' ], [ 't1', 't2' ], [ 't1', 't2', 't3' ] ], 'Inter looped UpRooted::Path';
 
 };
+
+subtest 'UpRooted::Tree with blocked UpRooted::Relations' => {
+    
+    plan 2;
+
+    my $schema = UpRooted::Schema.new( name => 's1' );
+    UpRooted::Table.new( :$schema, name => 't1' );
+    UpRooted::Table.new( :$schema, name => 't2' );
+    UpRooted::Column.new( table => $schema.table( 't1' ), name => 'c1', :!is-nullable );
+    UpRooted::Column.new( table => $schema.table( 't2' ), name => 'c2', :!is-nullable );
+    my $r1 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r1',
+        :is-blocked
+    );
+    my $r2 = UpRooted::Relation.new(
+        parent-columns => $schema.table( 't1' ).columns( 'c1' ),
+        child-columns => $schema.table( 't2' ).columns( 'c2' ),
+        name => 'r2'
+    );
+    
+    my $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+    is $tree.paths[1].relations[0], $r2, 'Blocked UpRooted::Relation not used';
+    
+    $r2.is-blocked = True;
+    $tree = UpRooted::Tree.new( root-table => $schema.table( 't1' ) );
+    is-deeply path-to-tables( $tree ), [ [ 't1' ], ], 'UpRooted::Table not used because all UpRooted::Relations leading to it were blocked';
+    
+}

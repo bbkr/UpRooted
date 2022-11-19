@@ -1,7 +1,7 @@
 {
     "perl": "6.d",
     "name": "UpRooted",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "description": "Extract trees of data from relational databases.",
     "authors": [
         "Paweł bbkr Pabian"

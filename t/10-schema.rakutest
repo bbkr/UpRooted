@@ -99,7 +99,7 @@ subtest 'UpRooted::Column' => {
 
 subtest 'UpRooted::::Relation' => {
     
-    plan 14;
+    plan 16;
 
     my $schema = UpRooted::Schema.new( name => 's1' );
     UpRooted::Table.new( :$schema, name => 't1' );
@@ -123,9 +123,13 @@ subtest 'UpRooted::::Relation' => {
     
     ok $schema.table( 't1' ).child-relation( 'r1' ):defined, 'UpRooted::Relation is present in UpRooted::Table';
     
+    ok $schema.table( 't1' ).child-relation( 'r1' ).is-blocked.not, 'UpRooted::Relation is not blocked by default';
+    $schema.table( 't1' ).child-relation( 'r1' ).is-blocked = True;
+    ok $schema.table( 't1' ).child-relation( 'r1' ).is-blocked, 'UpRooted::Relation can be blocked if needed';
+    
     with $schema.table( 't1' ).child-relation( 'r1' ) {
-        is .parent-table, $schema.table( 't1' ), 'UpRooted::Relation knows parent UpRooted::Table from UpRooted::Columns.';
-        is .child-table, $schema.table( 't2' ), 'UpRooted::Relation knows child UpRooted::Table from UpRooted::Columns.';
+        is .parent-table, $schema.table( 't1' ), 'UpRooted::Relation knows parent UpRooted::Table from UpRooted::Columns';
+        is .child-table, $schema.table( 't2' ), 'UpRooted::Relation knows child UpRooted::Table from UpRooted::Columns';
         nok .is-nullable, 'UpRooted::Relation is not nullable.';
     }
     
