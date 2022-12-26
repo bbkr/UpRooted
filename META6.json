@@ -1,6 +1,6 @@
 {
     "name": "UpRooted",
-    "version": "1.8.1",
+    "version": "1.8.2",
     "description": "Extract trees of data from relational databases.",
     "authors": [
         "Paweł bbkr Pabian"
