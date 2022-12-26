@@ -1,8 +1,10 @@
-on: [ push, pull_request ]
+on: [ push, workflow_dispatch ]
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container:
+      image: rakudo-star:alpine
     services:
       mysql:
         image: percona:5.7
@@ -25,15 +27,13 @@ jobs:
         options: --health-cmd="pg_isready" --health-interval=4s --health-timeout=2s --health-retries=8
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install rakudo
-          git clone https://github.com/ugexe/zef.git
-          cd zef
-          sudo raku -I. bin/zef install --/test .
-          /usr/lib/perl6/site/bin/zef install --/test DBIish App::Prove6
+          apk update
+          apk add --no-cache mysql-client mariadb-connector-c-dev postgresql-client
+          zef install --force --/test App::Prove6
+          zef install --deps-only --test-depends --/test .
       - name: Run tests
         env:
           UPROOTED_MYSQL_HOST: 127.0.0.1
@@ -46,4 +46,4 @@ jobs:
           UPROOTED_POSTGRESQL_USER: test
           UPROOTED_POSTGRESQL_PASSWORD: test
           UPROOTED_POSTGRESQL_DATABASE: test
-        run: /home/runner/.raku/bin/prove6 --incdir=lib/ t/
+        run: prove6
