@@ -36,12 +36,12 @@ jobs:
           zef install --deps-only --test-depends --/test .
       - name: Run tests
         env:
-          UPROOTED_MYSQL_HOST: 127.0.0.1
+          UPROOTED_MYSQL_HOST: mysql
           UPROOTED_MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
           UPROOTED_MYSQL_USER: test
           UPROOTED_MYSQL_PASSWORD: test
           UPROOTED_MYSQL_DATABASE: test
-          UPROOTED_POSTGRESQL_HOST: 127.0.0.1
+          UPROOTED_POSTGRESQL_HOST: postgresql
           UPROOTED_POSTGRESQL_PORT: ${{ job.services.postgresql.ports[5432] }}
           UPROOTED_POSTGRESQL_USER: test
           UPROOTED_POSTGRESQL_PASSWORD: test
