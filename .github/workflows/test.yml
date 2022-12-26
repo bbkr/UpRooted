@@ -37,12 +37,12 @@ jobs:
       - name: Run tests
         env:
           UPROOTED_MYSQL_HOST: mysql
-          UPROOTED_MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+          UPROOTED_MYSQL_PORT: 3306
           UPROOTED_MYSQL_USER: test
           UPROOTED_MYSQL_PASSWORD: test
           UPROOTED_MYSQL_DATABASE: test
           UPROOTED_POSTGRESQL_HOST: postgresql
-          UPROOTED_POSTGRESQL_PORT: ${{ job.services.postgresql.ports[5432] }}
+          UPROOTED_POSTGRESQL_PORT: 5432
           UPROOTED_POSTGRESQL_USER: test
           UPROOTED_POSTGRESQL_PASSWORD: test
           UPROOTED_POSTGRESQL_DATABASE: test
