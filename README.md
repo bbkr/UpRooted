@@ -40,7 +40,7 @@ Your user will be saved as `out.sql` file.
 
 ## DOCKER
 
-If you do not have Raku installed UpRooted is also available as [Docker image](https://hub.docker.com/repository/docker/bbkr2/uprooted).
+If you do not have Raku installed UpRooted is also available as [Docker image](https://hub.docker.com/r/bbkr2/uprooted).
 
 ## MODULES
 
